@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Run Calendar</title>
+    <style>
+        body {
+            font: 10px sans-serif;
+            shape-rendering: crispEdges;
+        }
+
+        .day {
+            fill: #fff;
+            stroke: #ccc;
+        }
+
+        .month {
+            fill: none;
+            stroke: #000;
+            stroke-width: 2px;
+        }
+
+        .BuGn .q0-9 {
+            fill: rgb(247,252,253);
+        }
+
+        .BuGn .q1-9 {
+            fill: rgb(229,245,249);
+        }
+
+        .BuGn .q2-9 {
+            fill: rgb(204,236,230);
+        }
+
+        .BuGn .q3-9 {
+            fill: rgb(153,216,201);
+        }
+
+        .BuGn .q4-9 {
+            fill: rgb(102,194,164);
+        }
+
+        .BuGn .q5-9 {
+            fill: rgb(65,174,118);
+        }
+
+        .BuGn .q6-9 {
+            fill: rgb(35,139,69);
+        }
+
+        .BuGn .q7-9 {
+            fill: rgb(0,109,44);
+        }
+
+        .BuGn .q8-9 {
+            fill: rgb(0,68,27);
+        }
+
+        /* http://tristen.ca/hcl-picker/#/clh/8/247/0D2A51/8BA2E5 */
+
+
+
+
+
+
+
+
+
+
+
+
+        .hcl .q0 {
+            fill: #131D26;
+        }
+
+        .hcl .q1 {
+            fill: #1C313C;
+        }
+
+        .hcl .q2 {
+            fill: #234652;
+        }
+
+        .hcl .q3 {
+            fill: #275D68;
+        }
+
+        .hcl .q4 {
+            fill: #2A757C;
+        }
+
+        .hcl .q5 {
+            fill: #2E8E8E;
+        }
+
+        .hcl .q6 {
+            fill: #35A89E;
+        }
+
+        .hcl .q7 {
+            fill: #42C2AB;
+        }
+
+        .hcl .q8 {
+            fill: #56DDB5;
+        }
+
+        .hcl .q9 {
+            fill: #6FF8BD;
+        }
+
+
+        .hcl2 .q0 {
+            fill: #151F29;
+        }
+
+        .hcl2 .q1 {
+            fill: #19333E;
+        }
+
+        .hcl2 .q2 {
+            fill: #194A50;
+        }
+
+        .hcl2 .q3 {
+            fill: #1B625F;
+        }
+
+        .hcl2 .q4 {
+            fill: #267A69;
+        }
+
+        .hcl2 .q5 {
+            fill: #3E926D;
+        }
+
+        .hcl2 .q6 {
+            fill: #5FAA6D;
+        }
+
+        .hcl2 .q7 {
+            fill: #87C16A;
+        }
+
+        .hcl2 .q8 {
+            fill: #B6D566;
+        }
+
+        .hcl2 .q9 {
+            fill: #EAE865;
+        }
+    </style>
+</head>
+<body>
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script>
+
+            var width = 960,
+                height = 136,
+                cellSize = 17; // cell size
+
+            var day = function (d) { 
+                  return (d.getDay() + 6) % 7; // sunday-start => monday-start
+                  },
+                week = d3.time.format("%W"),
+                distance = d3.format(".1"),
+                format = d3.time.format("%Y-%m-%d");
+
+
+
+
+
+            d3.tsv("log.txt", function (error, csv) {
+                var data = d3.nest()
+                  .key(function (d) { return d.Date; })
+                  .rollup(function (d) {
+                      var distance = 0;
+                      for (var i = 0; i < d.length; i++) {
+                          if (d[i].Type !== "Run") continue;
+                          var multiplier = 1.0;
+                          if (d[i].DistanceUnit === "Mile") {
+                              multiplier = 1.609;
+                          }
+                          else if (d[i].DistanceUnit === "Meter")
+                          {
+                              multiplier = 1 / 1000;
+                          }
+                          distance += d[i].Distance * multiplier;
+                      }
+                      return distance;
+                  })
+                  .map(csv.filter(function (x) { return x.Type === "Run"; }));
+                var start = new Date(csv[0].Date).getFullYear();
+                var end = new Date(csv[csv.length - 1].Date).getFullYear() + 1;
+
+                var color = d3.scale.quantize()
+    .domain([50,0])
+    .range(d3.range(10).map(function (d) { return "q" + d; }));
+
+                var svg = d3.select("body").selectAll("svg")
+    .data(d3.range(start, end))
+  .enter().append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("class", "hcl2")
+  .append("g")
+    .attr("transform", "translate(" + ((width - cellSize * 53) / 2) + "," + (height - cellSize * 7 - 1) + ")");
+
+                svg.append("text")
+                    .attr("transform", "translate(-6," + cellSize * 3.5 + ")rotate(-90)")
+                    .style("text-anchor", "middle")
+                    .text(function (d) { return d; });
+
+                var rect = svg.selectAll(".day")
+                    .data(function (d) { return d3.time.days(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
+                  .enter().append("rect")
+                    .attr("class", "day")
+                    .attr("width", cellSize)
+                    .attr("height", cellSize)
+                    .attr("x", function (d) { return week(d) * cellSize; })
+                    .attr("y", function (d) { return day(d) * cellSize; })
+                    .datum(format);
+
+                rect.append("title")
+                    .text(function (d) { return d; });
+
+                svg.selectAll(".month")
+                    .data(function (d) { return d3.time.months(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
+                  .enter().append("path")
+                    .attr("class", "month")
+                    .attr("d", monthPath);
+
+                rect.filter(function (d) { return d in data; })
+                    .attr("class", function (d) { return "day " + color(data[d]); })
+                  .select("title")
+                    .text(function (d) { return d + ": " + distance(data[d]); });
+            });
+
+            function monthPath(t0) {
+                var t1 = new Date(t0.getFullYear(), t0.getMonth() + 1, 0),
+                    d0 = +day(t0), w0 = +week(t0),
+                    d1 = +day(t1), w1 = +week(t1);
+                return "M" + (w0 + 1) * cellSize + "," + d0 * cellSize
+                    + "H" + w0 * cellSize + "V" + 7 * cellSize
+                    + "H" + w1 * cellSize + "V" + (d1 + 1) * cellSize
+                    + "H" + (w1 + 1) * cellSize + "V" + 0
+                    + "H" + (w0 + 1) * cellSize + "Z";
+            }
+
+            d3.select(self.frameElement).style("height", "2910px");
+
+        </script>
+    </body>
+</html>
