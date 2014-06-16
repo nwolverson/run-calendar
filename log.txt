@@ -99,7 +99,7 @@ Date	TimeOfDay	Type	SubType	Distance	DistanceUnit	Duration	Weight	WeightUnit	Res
 2007-06-23		Run	Easy	4.50	Kilometer	0:0:00	66.0	kg												braids	Asphalt,Trail		Unknown	No Log												
 2007-06-25		Run	Easy	11.50	Kilometer	0:0:00	66.0	kg												braids	Asphalt,Trail		Unknown	No Log												
 2007-06-29		Run	Easy	0.50	Mile	0:0:00	66.0	kg												warmup etc.			Unknown	No Log												
-2007-06-29		Run	Race	4.50	Mile	0:31:22	66.0	kg															Unknown	No Log					161	698						
+2007-06-29		Run	Race	4.50	Mile	0:31:22	66.0	kg												Black Rock 5	Asphalt,Trail		Unknown	No Log					161	698						
 2007-07-02		Run	Easy	15.00	Kilometer	0:0:00	66.0	kg											cw+m+p+cc+m	braids	Asphalt,Trail		Unknown	No Log												
 2007-07-03		Row	Default	3000.00	Meter	0:13:48	66.0	kg																												
 2007-07-03		Weights	0				66.0	kg																												
@@ -1517,9 +1517,107 @@ Date	TimeOfDay	Type	SubType	Distance	DistanceUnit	Duration	Weight	WeightUnit	Res
 2014-03-18		Run	Easy	1.20	Kilometer	0:0:00														office-gym			ASICS	GT-1000	11.00	UK	#2	60.00								
 2014-03-18	7:45	Run	Easy	8.80	Kilometer	0:0:00														Work-ravelstone dykes-bike path home	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
 2014-03-18	19:30	Run	Default	13.08	Kilometer	0:0:00														Home via portabello	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
+2014-03-19		Bike	Default	9.70	Kilometer	0:0:00	66.0	kg												Bike Home-Work x2																
 2014-03-19	19:20	Run	Default	10.78	Kilometer	0:52:56										Windy			windy	Cramond			Brooks	Adrenaline GTS14	10.50	UK										
 2014-03-20		Run	Default	4.58	Kilometer	0:23:38														Home-work			Brooks	Adrenaline GTS14	10.50	UK										
 2014-03-20		Run	Default	13.15	Kilometer	1:03:31	66.0	kg											some nice bits 4:25-4:30 feeling good	Home via portabello	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
 2014-03-20		Weights	0	0.00	Meter	0:0:00	66.0	kg																												
 2014-03-20		Run	Easy	1.20	Kilometer	0:0:00														office-gym			Brooks	Adrenaline GTS14	10.50	UK										
 2014-03-21	8:00	Run	Default	8.76	Kilometer	0:41:24	66.0	kg															Brooks	Adrenaline GTS14	10.50	UK										
+2014-03-22		Run	Default	7.32	Kilometer	0:34:29																	Saucony	Excursion TR7	10.50	UK										
+2014-03-22		Run	Default	8.00	Kilometer	0:37:50																	Saucony	Excursion TR7	10.50	UK										
+2014-03-23	8:30	Run	Race	50.50	Kilometer	3:32:13														Canalathon			adidas	adizero adios 2	11.00	UK		85.00	2	61						
+2014-03-24		Run	Easy	8.80	Kilometer	0:0:00													Feeling good. Like some pace in the legs, probably still running slowly	Work-ravelstone dykes-bike path home	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
+2014-03-25		Bike	Default	8.95	Kilometer	0:0:00	66.0	kg												Bike Home-Work-Omni-Home																
+2014-03-25		Weights	0	0.00	Meter	0:0:00	66.0	kg																												
+2014-03-25		Run	Default	13.70	Kilometer	0:0:00	66.0	kg											2xcw from omni<br>Chasing bike uphill each loop - and got both!<br>Feeling really good considering 50k sunday, some calf soreness/tightness	Arthur's seat loops	Asphalt		ASICS	GT-1000	11.00	UK	#2	60.00								
+2014-03-25	12:00	Run	Default	9.40	Kilometer	0:0:00														work-wol-murrayfield-balgreen rd	Asphalt,Track		ASICS	GT-1000	11.00	UK	#2	60.00								
+2014-03-26		Run	Default	15.19	Kilometer	1:20:08													Super slow. Completely sluggish feeling, yet felt like I could go on forever.<br>Stopped back at house for pee break after taking wrong turn!				Brooks	Adrenaline GTS14	10.50	UK										
+2014-03-26		Bike	Default	9.70	Kilometer	0:0:00	66.0	kg												Bike Home-Work x2																
+2014-03-27		Run	Easy	11.72	Kilometer	1:01:43														Work-Meadows & warmup lap	Asphalt															
+2014-03-27		Bike	Default	4.85	Kilometer	0:0:00	66.0	kg												Bike Home-Work																
+2014-03-27		Run	Fartlek	4.23	Kilometer	0:16:50													1min fast, 45s slow  * 10<br>3'06-3'22	Meadows training			New Balance	901	10.50	UK										
+2014-03-27	12:00	Run	Default	9.00	Kilometer	0:42:13														work-wol-murrayfield-balgreen rd	Asphalt,Track		New Balance	901	10.50	UK										
+2014-03-28		Bike	Default	4.85	Kilometer	0:0:00	66.0	kg												Bike Home-Work																
+2014-03-28		Weights	0	0.00	Meter	0:0:00	66.0	kg																												
+2014-03-28	8:00	Run	Easy	8.53	Kilometer	0:43:53													Super sluggish start. warmed up a bit eventually. sore left shin/muscle area	Work-ravelstone dykes-bike path home	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
+2014-03-28	19:00	Run	Default	5.00	Kilometer	0:0:00													2x 2-300m fast 	Treadmill	Treadmill		Brooks	Adrenaline GTS14	10.50	UK										
+2014-03-29		Run	Race	5.00	Kilometer	0:17:03	66.0	kg												Silverknowes ParkRun 5k			adidas	adizero adios 2	11.00	UK		85.00	5							
+2014-03-29		Run	Default	14.80	Kilometer	1:13:03														Cramond			adidas	adizero adios 2	11.00	UK		85.00								
+2014-03-30	12:07	Run	Long	44.08	Kilometer	4:34:02.65														WHW			Saucony	Excursion TR7	10.50	UK										
+2014-03-31	9:47	Run	Long	33.44	Kilometer	4:36:07.03														WHW			Saucony	Excursion TR7	10.50	UK										
+2014-04-01		Run	Easy	2.00	Kilometer	0:12:00													painful. possibly worse walking than running though?				Brooks	Adrenaline GTS14	10.50	UK										
+2014-04-02		Run	Easy	2.00	Kilometer	0:13:20																	adidas	adizero adios 2	11.00	UK		85.00								
+2014-04-03		Run	Easy	2.00	Kilometer	0:0:00																	Brooks	Adrenaline GTS14	10.50	UK										
+2014-04-12	10:52	Run	Default	5.03	Kilometer	0:25:09.68																	Brooks	Adrenaline GTS14	10.50	UK										
+2014-04-13		Run	Race	26.20	Mile	3:10:25	66.0	kg											Meant to be easy recovering from ankle, ended up faster but tough finish, completely blown.<br><br><br>Split<tab>Time Of Day<tab>Time<tab>Diff<tab>min/km<tab>km/h<tab>Place<br>5K<tab>10:22:28<tab>00:21:27<tab>21:27<tab>04:18<tab>13.99<tab>-<br>10K<tab>10:44:04<tab>00:43:03<tab>21:36<tab>04:20<tab>13.89<tab>-<br>15K<tab>11:05:51<tab>01:04:50<tab>21:47<tab>04:22<tab>13.77<tab>-<br>20K<tab>11:28:04<tab>01:27:03<tab>22:13<tab>04:27<tab>13.51<tab>-<br>HALF<tab>11:32:58<tab>01:31:57<tab>04:54<tab>04:29<tab>13.42<tab>-<br>25K<tab>11:50:39<tab>01:49:37<tab>17:40<tab>04:32<tab>13.25<tab>-<br>30K<tab>12:13:17<tab>02:12:16<tab>22:39<tab>04:32<tab>13.25<tab>-<br>35K<tab>12:36:28<tab>02:35:27<tab>23:11<tab>04:39<tab>12.94<tab>-<br>40K<tab>13:00:30<tab>02:59:29<tab>24:02<tab>04:49<tab>12.48<tab>-<br>Finish time<tab>13:11:26<tab>03:10:25<tab>10:56<tab>04:59<tab>12.04<tab>2166	London Marathon			Brooks	Adrenaline GTS14	10.50	UK										
+2014-04-15		Run	Easy	4.31	Kilometer	0:21:37	66.0	kg															ASICS	GT-1000	11.00	UK	#2	60.00								
+2014-04-16		Run	Easy	4.85	Kilometer	0:0:00														Bike Home-Work			Saucony	Excursion TR7	10.50	UK										
+2014-04-21		Run	Easy	8.04	Kilometer	0:36:34																	Brooks	Adrenaline GTS14	10.50	UK										
+2014-04-23		Run	Easy	8.80	Kilometer	0:0:00														Work-ravelstone dykes-bike path home	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
+2014-04-29		Run	Default	6.51	Kilometer	0:30:00																	Brooks	Adrenaline GTS14	10.50	UK										
+2014-04-29		Bike	Default	9.70	Kilometer	0:0:00	66.0	kg												Bike Home-Work x2																
+2014-04-30		Bike	Default	9.70	Kilometer	0:0:00	68.0	kg												Bike Home-Work x2																
+2014-05-01		Run	Default	5.80	Kilometer	0:28:20																	Brooks	Adrenaline GTS14	10.50	UK										
+2014-05-01		Bike	Default	9.70	Kilometer	0:0:00	68.0	kg												Bike Home-Work x2																
+2014-05-02		Bike	Default	9.70	Kilometer	0:0:00	68.0	kg												Bike Home-Work x2																
+2014-05-03		Bike	Default	16.00	Kilometer	0:0:00	68.0	kg												Cramond																
+2014-05-04		Run	Long	20.36	Kilometer	1:37:16														Cramond			Saucony	Excursion TR7	10.50	UK										
+2014-05-05		Run	Tempo	5.72	Kilometer	0:25:13														Granton			adidas	adizero adios 2	11.00	UK		85.00								
+2014-05-06		Run	Default	5.60	Kilometer	0:26:35														Granton			Saucony	Excursion TR7	10.50	UK										
+2014-05-06		Weights	0	0.00	Meter	0:0:00	68.0	kg																												
+2014-05-06		Bike	Default	9.70	Kilometer	0:0:00	68.0	kg												Bike Home-Work x2																
+2014-05-07		Bike	Default	4.85	Kilometer	0:0:00	68.0	kg												Bike Home-Work																
+2014-05-08		Bike	Default	4.85	Kilometer	0:0:00	68.0	kg											home on busted tube...	Bike Home-Work																
+2014-05-08		Weights	0	0.00	Meter	0:0:00	68.0	kg																												
+2014-05-09		Run	Default	5.56	Kilometer	0:26:08														Water of leith			New Balance	901	10.50	UK										
+2014-05-10		Run	Race	10.00	Kilometer	0:36:27	68.0	kg												Penicuik 10k			adidas	adizero adios 2	11.00	UK		85.00	8	172						
+2014-05-10		Run	Easy	2.23	Kilometer	0:15:01														warmup etc.			adidas	adizero adios 2	11.00	UK		85.00								
+2014-05-11		Run	Default	8.00	Kilometer	0:35:53														Granton			Brooks	Adrenaline GTS14	10.50	UK										
+2014-05-12		Run	Easy	1.20	Kilometer	0:0:00														office-gym			Brooks	Adrenaline GTS14	10.50	UK										
+2014-05-12		Run	Easy	5.50	Kilometer	0:0:00	68.0	kg												Gym-home via wol			Brooks	Adrenaline GTS14	10.50	UK										
+2014-05-13		Run	Default	15.66	Kilometer	0:0:00	68.0	kg												Corstorphine hill & woods - granton - home			Brooks	Adrenaline GTS14	10.50	UK										
+2014-05-14		Run	Default	5.40	Kilometer	0:0:00														Gym-home via wol			Brooks	Adrenaline GTS14	10.50	UK										
+2014-05-14		Run	Easy	1.20	Kilometer	0:0:00														office-gym			Brooks	Adrenaline GTS14	10.50	UK										
+2014-05-15		Run	Easy	9.65	Kilometer	0:0:00														Work-meadows-warmup-home			New Balance	901	10.50	UK										
+2014-05-15		Run	Interval	8.00	Kilometer	0:0:00													12m 8m 4m 2m 1m off 2m recovery<br>	Meadows training																
+2014-05-19		Run	Default	18.90	Kilometer	0:0:00														Work-gym-calton-arthur-innocent-portobello-home			Brooks	Adrenaline GTS14	10.50	UK										
+2014-05-19		Weights	0	0.00	Meter	0:0:00	68.0	kg																												
+2014-05-20		Run	Default	8.80	Kilometer	0:0:00														Work-ravelstone dykes-bike path home	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
+2014-05-21		Run	Race	2.00	Mile	0:10:37													1m split ~5:05. Crash & burn! Massively lactic, asthmatic (struggled to breathe sitting down afterwards, still coughing a day later)	Meadows race	Asphalt	Sri Chinmoy self-transcendence summer race series, Meadows 5km etc.	adidas	adizero adios 2	11.00	UK		85.00	7	75						
+2014-05-21		Run	Easy	12.02	Kilometer	0:53:46														Work-meadows-warmup-home																
+2014-05-22		Run	Interval	3.00	Kilometer	0:11:42													3-person relay around grass triangle in meadows w alternating short/long legs<br>5 x short (~180m, 38s)<br>4 x long (~500m, 1:45)																	
+2014-05-22		Run	Easy	9.65	Kilometer	0:0:00														Work-meadows-warmup-home																
+2014-05-23		Run	Easy	3.83	Kilometer	0:19:48														Home-work			Brooks	Adrenaline GTS14	10.50	UK										
+2014-05-24		Run	Race	5.00	Kilometer	0:17:50														Silverknowes ParkRun 5k			ASICS	GT-1000	11.00	UK	#2	60.00								
+2014-05-24		Run	Default	15.05	Kilometer	1:14:03														Cramond			ASICS	GT-1000	11.00	UK	#2	60.00								
+2014-05-25		Run	Easy	5.87	Kilometer	0:29:45														warmup etc.			ASICS	GT-1000	11.00	UK	#2	60.00								
+2014-05-25		Run	Race	12.99	Kilometer	0:50:37	68.0	kg												Edinburgh marathon relay leg 3			ASICS	GT-1000	11.00	UK	#2	60.00								
+2014-05-26		Run	Default	15.94	Kilometer	1:13:10														Cramond			Saucony	Excursion TR7	10.50	UK										
+2014-05-27		Weights	0	0.00	Meter	0:0:00	68.0	kg											not too much																	
+2014-05-27		Run	Default	6.50	Kilometer	0:0:00	68.0	kg												office-gym-home			Brooks	Adrenaline GTS14	10.50	UK										
+2014-05-28		Run	Race	1.00	Mile	0:5:01	68.0	kg												Meadows race	Asphalt	Sri Chinmoy self-transcendence summer race series, Meadows 5km etc.	adidas	adizero adios 2	11.00	UK		85.00								
+2014-05-28		Run	Default	2.90	Kilometer	0:0:00	68.0	kg												warmup etc.			adidas	adizero adios 2	11.00	UK		85.00								
+2014-05-28		Run	Default	7.20	Kilometer	0:0:00														Work-meadows-home	Asphalt,Concrete		Brooks	Adrenaline GTS14	10.50	UK										
+2014-05-29		Run	Default	8.75	Kilometer	0:42:54														Work-ravelstone dykes-bike path home	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
+2014-05-29	19:15	Run	Default	20.97	Kilometer	1:50:21.12										Overcast,Rain	13	C		Work-corstorphine hill-cramond-home			Brooks	Adrenaline GTS14	10.50	UK										
+2014-05-30		Run	Easy	6.50	Kilometer	0:0:00														office-gym-home			Brooks	Adrenaline GTS14	10.50	UK										
+2014-05-30		Weights	0	0.00	Meter	0:0:00	68.0	kg																												
+2014-05-31		Run	Race	5.00	Kilometer	0:17:36	68.0	kg												Silverknowes ParkRun 5k			Brooks	Adrenaline GTS14	10.50	UK										
+2014-05-31		Run	Easy	14.87	Kilometer	1:11:31														Cramond			Brooks	Adrenaline GTS14	10.50	UK										
+2014-06-01		Walk	Default	15.00	Kilometer	0:3:55	68.0	kg											900m	Pentlands																
+2014-06-02		Run	Easy	6.50	Kilometer	0:0:00														office-gym-home			New Balance	901	10.50	UK										
+2014-06-04		Run	Easy	8.80	Kilometer	0:0:00													Felt terrible. Heavy, slow.	Work-ravelstone dykes-bike path home	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
+2014-06-05		Run	Tempo	5.74	Kilometer	0:24:33														Granton			Saucony	Excursion TR7	10.50	UK										
+2014-06-06		Run	Default	8.01	Kilometer	0:34:46														Granton			Brooks	Adrenaline GTS14	10.50	UK										
+2014-06-07		Run	Race	5.00	Kilometer	0:17:06	68.0	kg												Silverknowes ParkRun 5k			adidas	Adios Boost	11.00	UK		87.99								
+2014-06-07		Run	Easy	2.35	Kilometer	0:10:54	68.0	kg												warmup etc.			adidas	Adios Boost	11.00	UK		87.99								
+2014-06-08	9:59	Run	Race	42.20	Kilometer	3:04:44										Rain,PartlyCloudy	15	C		Strathearn Marathon			Brooks	Adrenaline GTS14	10.50	UK			10	149						
+2014-06-10		Run	Default	6.50	Kilometer	0:0:00														office-gym-home			New Balance	901	10.50	UK										
+2014-06-11		Run	Easy	8.59	Kilometer	0:44:11													Not easy but slow. Full of beer & pizza.																	
+2014-06-12		Run	Default	10.99	Kilometer	0:52:47																	Brooks	Adrenaline GTS14	10.50	UK										
+2014-06-13		Run	Race	4.50	Mile	0:26:44	68.5	kg												Black Rock 5	Asphalt,Trail		Saucony	Excursion TR7	10.50	UK										
+2014-06-13		Run	Easy	3.50	Kilometer	0:0:00														warmup etc.			Saucony	Excursion TR7	10.50	UK										
+2014-06-14		Run	Race	5.00	Kilometer	0:17:53														Silverknowes ParkRun 5k			Brooks	Adrenaline GTS14	10.50	UK			10	397						
+2014-06-14		Run	Easy	14.44	Kilometer	1:09:50														Cramond			Brooks	Adrenaline GTS14	10.50	UK										
+2014-06-15	10:07	Run	Long	25.32	Kilometer	2:46:08.69										Overcast	13	C		Seven Hills recce	Asphalt,Treadmill		Saucony	Excursion TR7	10.50	UK										
