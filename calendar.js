@@ -4,7 +4,8 @@ var margin = { top: 10, bottom: 10, midBreak: 10, left: 40, right: 18 },
     cellSize = 17,
     barHeight = cellSize * 3,
     width = 960,
-    height = cellSize * 7 + 1,
+    monthTotalHeight = 7,
+    height = cellSize * 7 + 1 + monthTotalHeight,
     totalHeight = height + barHeight + margin.midBreak;
     
 
@@ -74,7 +75,10 @@ function createChart(data, start, end) {
         .text(function (d) { return d; });
 
     // Create the cells
-    var rect = svg.selectAll(".day")
+    var rect = svg
+        .append("g")
+        .attr("transform", "translate(0," + monthTotalHeight + ")")
+        .selectAll(".day")
         .data(function (d) { return d3.time.days(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
         .enter().append("rect")
         .attr("class", "day")
@@ -89,7 +93,27 @@ function createChart(data, start, end) {
     rect.append("title")
         .text(function (d) { return d; });
 
+    // Monthly data
+    var monthData = d3.nest()
+        .key(function (x) { return new Date(x.key).getFullYear(); })
+        .key(function (x) { return (new Date(x.key)).getMonth(); })
+        .rollup(function (xs) { return d3.sum(xs, function (x) { return x.value; }); })
+        .map(d3.entries(data).filter(function (pair) { var y = new Date(pair.key).getFullYear(); return y >= start && y < end; }));
+    function getMonthData(d) {
+        return monthData[d.getFullYear()][d.getMonth()] || 0;
+    }
     
+    svg.selectAll(".monthTotal")
+        .data(function (d) { return d3.time.months(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
+        .enter()
+        .append("text")
+        .attr("class", "monthTotal")
+        .attr("x", function (d) { return week(d3.time.monday.ceil(d)) * cellSize; })
+        .text(function (d) {
+            var dist = getMonthData(d);
+            return dist > 0 ? d3.time.format("%b")(d) + ": " + d3.format(".0f")(dist) : "";
+        })
+
     // Weekly data
     var weekData = d3.nest()
         .key(function (x) { return new Date(x.key).getFullYear(); })
@@ -128,7 +152,9 @@ function createChart(data, start, end) {
         .text(function (d) { return d.getFullYear() + ", week " + d3.time.mondayOfYear(d) + ": " + distance(weekData[d.getFullYear()][d3.time.mondayOfYear(d)]) });
 
     // Draw the month path
-    svg.selectAll(".month")
+    svg.append("g")
+        .attr("transform", "translate(0," + monthTotalHeight + ")")
+        .selectAll(".month")
         .data(function (d) { return d3.time.months(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
         .enter().append("path")
         .attr("class", "month")
@@ -153,6 +179,14 @@ function createChart(data, start, end) {
         .attr("height", "20px")
         .attr("width", "1000px")
         .attr("class", "hcl2 key");
+
+    var weekMargin = 110;
+    key.append("text")
+        .text("Key (total/day):")
+        .attr("x", 30)
+        .attr("y", 15);
+
+
     key.selectAll("rect")
         .data(d3.range(colorClasses.length))
         .enter()
@@ -160,15 +194,16 @@ function createChart(data, start, end) {
         .attr("width", 17)
         .attr("height", 17)
         .attr("class", function (d) { return colorClasses[d]; })
-        .attr("x", function (d) { return 30 + d * 80; })
+        .attr("x", function (d) { return weekMargin + d * 80; })
         .attr("y", function (d) { return 5; })
         .append("title").text(text);
     
-    key.selectAll("text")
+    key.selectAll(".keyText")
         .data(d3.range(colorClasses.length))
         .enter()
         .append("text")
-        .attr("x", function (d) { return 30 + d * 80 + 22; })
+        .attr("class", "keyText")
+        .attr("x", function (d) { return weekMargin + d * 80 + 22; })
         .attr("y", function (d) { return 15; })
         .text(text);
 }
