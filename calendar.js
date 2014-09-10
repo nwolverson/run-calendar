@@ -1,226 +1,97 @@
 ﻿/// <reference path="d3.v3.js" />
 
-var margin = { top: 10, bottom: 10, midBreak: 10, left: 40, right: 18 },
-    cellSize = 17,
-    barHeight = cellSize * 3,
-    width = 960,
-    monthTotalHeight = 7,
-    height = cellSize * 7 + 1 + monthTotalHeight,
-    totalHeight = height + barHeight + margin.midBreak;
-    
-
-function day(d) {
-    return (d.getDay() + 6) % 7; // sunday-start => monday-start
-}
-
-function distance(d) {
-    return d3.format(".1f")(d) + " km";
-}
-
-var week = d3.time.format("%W"),
-    format = d3.time.format("%Y-%m-%d");
-
-function monthPath(t0) {
-    var t1 = new Date(t0.getFullYear(), t0.getMonth() + 1, 0),
-        d0 = +day(t0), w0 = +week(t0),
-        d1 = +day(t1), w1 = +week(t1);
-    return "M" + (w0 + 1) * cellSize + "," + d0 * cellSize
-        + "H" + w0 * cellSize + "V" + 7 * cellSize
-        + "H" + w1 * cellSize + "V" + (d1 + 1) * cellSize
-        + "H" + (w1 + 1) * cellSize + "V" + 0
-        + "H" + (w0 + 1) * cellSize + "Z";
-}
-
-function sumDailyRuns(d) {
-    var distance = 0;
-    for (var i = 0; i < d.length; i++) {
-        if (d[i].Type !== "Run") continue;
-        var multiplier = 1.0;
-        if (d[i].DistanceUnit === "Mile") {
-            multiplier = 1.609;
-        }
-        else if (d[i].DistanceUnit === "Meter") {
-            multiplier = 1 / 1000;
-        }
-        distance += d[i].Distance * multiplier;
+require.config({
+  paths: {
+    d3: "http://d3js.org/d3.v3.min",
+    queue: "http://d3js.org/queue.v1.min"
+  },
+  shim: {
+    'jsonp': {
+      deps: ['d3']
     }
-    return distance;
-}
-
-function createChart(data, start, end) {
-    var colorClasses = d3.range(10).map(function (d) { return "q" + d; });
-    colorClasses.reverse()
-    var max = d3.max(d3.values(data));
-
-    var scaledRange = d3.scale.quantize().domain([0, max]);
-    var fixedRange = d3.scale.threshold()
-        .domain([5, 10, 15, 20, 25, 30, 40, 50, 70]);
-
-    var color = fixedRange.range(colorClasses);
-
-    // Create the rows
-    var svg = d3.select("body").selectAll("svg")
-        .data(d3.range(start, end))
-        .enter().append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", totalHeight + margin.top + margin.bottom)
-        .attr("class", "hcl2")
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    // Year text on left side (vertical)
-    svg.append("text")
-        .attr("transform", "translate(-6," + cellSize * 3.5 + ")rotate(-90)")
-        .style("text-anchor", "middle")
-        .text(function (d) { return d; });
-
-    // Create the cells
-    var rect = svg
-        .append("g")
-        .attr("transform", "translate(0," + monthTotalHeight + ")")
-        .selectAll(".day")
-        .data(function (d) { return d3.time.days(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
-        .enter().append("rect")
-        .attr("class", "day")
-        .attr("width", cellSize)
-        .attr("height", cellSize)
-        .attr("x", function (d) { return week(d) * cellSize; })
-        .attr("y", function (d) { return day(d) * cellSize; })
-        .datum(format);
-
-
-    // Tooltip for all (shows date every time)
-    rect.append("title")
-        .text(function (d) { return d; });
-
-    // Monthly data
-    var monthData = d3.nest()
-        .key(function (x) { return new Date(x.key).getFullYear(); })
-        .key(function (x) { return (new Date(x.key)).getMonth(); })
-        .rollup(function (xs) { return d3.sum(xs, function (x) { return x.value; }); })
-        .map(d3.entries(data).filter(function (pair) { var y = new Date(pair.key).getFullYear(); return y >= start && y < end; }));
-    function getMonthData(d) {
-        return monthData[d.getFullYear()][d.getMonth()] || 0;
-    }
-    
-    svg.selectAll(".monthTotal")
-        .data(function (d) { return d3.time.months(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
-        .enter()
-        .append("text")
-        .attr("class", "monthTotal")
-        .attr("x", function (d) { return week(d3.time.monday.ceil(d)) * cellSize; })
-        .text(function (d) {
-            var dist = getMonthData(d);
-            return dist > 0 ? d3.time.format("%b")(d) + ": " + d3.format(".0f")(dist) : "";
-        })
-
-    // Weekly data
-    var weekData = d3.nest()
-        .key(function (x) { return new Date(x.key).getFullYear(); })
-        .key(function (x) { return d3.time.mondayOfYear(new Date(x.key)); })
-        .rollup(function (xs) { return d3.sum(xs, function (x) { return x.value; }); })
-        .map(d3.entries(data).filter(function (pair) { var y = new Date(pair.key).getFullYear(); return y >= start && y < end; }));
-    var weekMax = d3.max( d3.values(weekData).map(d3.values).map(function (x) { return d3.max(x); }));
-    var weekScale = d3.scale.linear().domain([0, weekMax]).range([barHeight, 0]).nice(20);
-
-    function getWeekData(d){
-        return weekData[d.getFullYear()][d3.time.mondayOfYear(d)] || 0;
-    }
-    function weekBarHeight(d) {
-        return weekScale(getWeekData(d));
-    };
-    
-    var yAxis = d3.svg.axis()
-     .scale(weekScale)
-     .orient("left");
-
-    svg.append("g")
-        .attr("class", "weekAxis")
-        .attr("transform", "translate(0," + (height + margin.midBreak) + ")")
-        .call(yAxis);
-
-    // Draw weekly bars
-    var weekRect = svg.selectAll(".week")
-        .data(function (d) { return d3.time.mondays(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
-        .enter().append("rect")
-        .attr("class", "week")
-        .attr("width", cellSize)
-        .attr("height", function (x) { return  barHeight - weekBarHeight(x); })
-        .attr("x", function (d) { return week(d) * cellSize; })
-        .attr("y", function (d) { return height + margin.midBreak + weekBarHeight(d); })
-        .append("title")
-        .text(function (d) { return d.getFullYear() + ", week " + d3.time.mondayOfYear(d) + ": " + distance(weekData[d.getFullYear()][d3.time.mondayOfYear(d)]) });
-
-    // Draw the month path
-    svg.append("g")
-        .attr("transform", "translate(0," + monthTotalHeight + ")")
-        .selectAll(".month")
-        .data(function (d) { return d3.time.months(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
-        .enter().append("path")
-        .attr("class", "month")
-        .attr("d", monthPath);
-
-    // Tooltip for non-empty. e.g. "2014-03-23: 50.5"
-    rect.filter(function (d) { return d in data; })
-        .attr("class", function (d) { return "day " + color(data[d]); })
-        .select("title")
-        .text(function (d) { return d + " (" + d3.time.format("%a")(new Date(d)) + "): " + distance(data[d]); });
-
-    // Key
-    function text(d) {
-        var cls = colorClasses[d];
-        var extent = color.invertExtent(cls);
-        var fmt = d3.format(".0f");
-        return fmt(extent[0]||0) + "-" + fmt(extent[1] || d3.round(max+5, -1)) + " km";
-    }
-
-    var key = d3.select("body")
-        .append("svg")
-        .attr("height", "20px")
-        .attr("width", "1000px")
-        .attr("class", "hcl2 key");
-
-    var weekMargin = 110;
-    key.append("text")
-        .text("Key (total/day):")
-        .attr("x", 30)
-        .attr("y", 15);
-
-
-    key.selectAll("rect")
-        .data(d3.range(colorClasses.length))
-        .enter()
-        .append("rect")
-        .attr("width", 17)
-        .attr("height", 17)
-        .attr("class", function (d) { return colorClasses[d]; })
-        .attr("x", function (d) { return weekMargin + d * 80; })
-        .attr("y", function (d) { return 5; })
-        .append("title").text(text);
-    
-    key.selectAll(".keyText")
-        .data(d3.range(colorClasses.length))
-        .enter()
-        .append("text")
-        .attr("class", "keyText")
-        .attr("x", function (d) { return weekMargin + d * 80 + 22; })
-        .attr("y", function (d) { return 15; })
-        .text(text);
-}
-
-d3.tsv("log.txt", function (error, csv) {
-    var data = d3.nest()
-      .key(function (d) { return d.Date; })
-      .rollup(sumDailyRuns)
-      .map(csv.filter(function (x) { return x.Type === "Run"; }));
-
-    var start = new Date(csv[0].Date).getFullYear();
-    var end = new Date(csv[csv.length - 1].Date).getFullYear() + 1;
-
-    // limit
-    start = Math.max(end - 3, start);
-
-    createChart(data, start, end);
+  }
 });
 
-d3.select(self.frameElement).style("height", "2910px");
+require(["d3", "jsonp", "strava", "runningahead", "calendarchart", "dataloader"],
+  function (d3, _jsonp, strava, ra, chart, dataloader) {
+
+var allData = [];
+var data = allData;
+
+function getValue(d) { return d.type + "_" + d.file; }
+function getText(d) { return d.type + ": " + d.file; }
+
+function dataLoaded(data) {
+  var dates = data.keys().sort();
+
+  var start = new Date(dates[0]).getFullYear();
+  var end = new Date(dates[dates.length - 1]).getFullYear() + 1;
+
+  // Number of Years shown dropdown
+  var years = d3.select("#years").selectAll("option")
+      .data(d3.range(start,end).reverse());
+  years.enter().append("option")
+      .attr("value", function (x) { return x;})
+      .html(function (x) { return end-x;});
+  years.exit().remove();
+
+  // Update on user input change
+  var update = function() {
+    var showStart = d3.select("#years").property("value");
+    var showWeeks = d3.select("#showweeks").property("checked");
+
+    chart.createChart(data, showStart, end, showWeeks);
+  };
+  d3.select("#years").on("change", update);
+  d3.select("#showweeks").on("change", update)
+  update();
+
+  chart.makeKey();
+};
+
+var ds = d3.select("#data_sources");
+function reloadData() {
+  data = allData.filter(function (x) {
+    var o = ds.selectAll("option")
+      .filter(function (_) { return this.value == getValue(x); });
+    return o.node().selected;
+  });
+
+  // TODO fix update of non-weekly data
+  d3.selectAll("svg.year").remove();
+
+  dataloader.loadData(data, dataLoaded);
+}
+
+ds.on("change", reloadData);
+
+function setupDataList() {
+  ds.selectAll("option").remove();
+  allData.forEach(function (d) {
+    ds.append("option").attr("value", getValue(d)).text(getText(d));
+  });
+}
+setupDataList();
+reloadData();
+
+var filesel = d3.select("#upload_ra");
+filesel.on("change", function() {
+  var upload = filesel.node(), file = upload.files[0];
+  allData.push(ra.fromFileUpload(file));
+  setupDataList();
+});
+
+d3.select("#connect_strava").on("click", function () {
+  var stravaUrl = "https://www.strava.com/oauth/authorize?client_id=2746&response_type=code&redirect_uri=http://localhost:8123/token_exchange&scope=public&state=mystate&approval_prompt=force";
+  var popup = window.open(stravaUrl, 'login', 'height=500,width=800');
+  if (window.focus) { popup.focus(); }
+});
+
+window.loadedStrava = function(token) {
+  allData.push(strava.fromLatest(token), strava.fromYTD(token));
+  d3.select("#connect_strava").remove();
+  setupDataList();
+};
+
+// d3.select(self.frameElement).style("height", "2910px");
+});

@@ -1621,3 +1621,128 @@ Date	TimeOfDay	Type	SubType	Distance	DistanceUnit	Duration	Weight	WeightUnit	Res
 2014-06-14		Run	Race	5.00	Kilometer	0:17:53														Silverknowes ParkRun 5k			Brooks	Adrenaline GTS14	10.50	UK			10	397						
 2014-06-14		Run	Easy	14.44	Kilometer	1:09:50														Cramond			Brooks	Adrenaline GTS14	10.50	UK										
 2014-06-15	10:07	Run	Long	25.32	Kilometer	2:46:08.69										Overcast	13	C		Seven Hills recce	Asphalt,Treadmill		Saucony	Excursion TR7	10.50	UK										
+2014-06-16		Run	Tempo	10.20	Kilometer	0:0:00														Corstorphine hill			Brooks	Adrenaline GTS14	10.50	UK										
+2014-06-17		Run	Easy	10.80	Kilometer	0:0:00													+work-gym	Home via portabello	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
+2014-06-18		Run	Race	1.00	Mile	0:4:57														Meadows race	Asphalt	Sri Chinmoy self-transcendence summer race series, Meadows 5km etc.	adidas	adizero adios 2	11.00	UK		85.00	7	64						
+2014-06-18		Run	Default	4.92	Kilometer	0:24:35														meadows-home			Brooks	Adrenaline GTS14	10.50	UK										
+2014-06-18		Run	Easy	4.21	Kilometer	0:21:16														warmup etc.			adidas	adizero adios 2	11.00	UK		85.00								
+2014-06-19		Run	Default	8.63	Kilometer	0:43:42														Work-ravelstone dykes-bike path home	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
+2014-06-21		Run	Race	5.00	Kilometer	0:19:10														Silverknowes ParkRun 5k			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-06-21		Run	Default	14.62	Kilometer	1:09:23														Cramond			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-06-22		Run	Easy	2.26	Kilometer	0:12:58														warmup etc.			Saucony	Excursion TR7	10.50	UK										
+2014-06-22	11:13	Run	Race	23.40	Kilometer	1:54:14										PartlyCloudy	18	C		Seven hills race			Saucony	Excursion TR7	10.50	UK			14	163						
+2014-06-25		Run	Easy	8.80	Kilometer	0:0:00													Right knee still sore/wrong from fall on sunday. Feels like bruising on front/left of knee is pushing things out & majorly screwing posture.	Work-ravelstone dykes-bike path home	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
+2014-06-28		Run	Easy	10.00	Kilometer	0:0:00													Bus-parkrun-home	warmup etc.			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-06-28		Run	Race	5.00	Kilometer	0:19:00	68.5	kg												Silverknowes ParkRun 5k			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-06-29		Run	Long	25.75	Kilometer	1:57:21																	Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-06-30		Run	Default	10.80	Kilometer	0:0:00													work-gym-port-home	Home via portabello	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
+2014-06-30		Weights	0	0.00	Meter	0:0:00	68.5	kg																												
+2014-07-01	8:06	Run	Easy	8.80	Kilometer	0:45:15														Work-ravelstone dykes-bike path home	Asphalt		Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-01	18:20	Run	Default	3.64	Kilometer	0:18:20																	Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-02		Weights	0	0.00	Meter	0:0:00	68.5	kg											squats																	
+2014-07-02	8:12	Run	Default	9.06	Kilometer	0:42:24														Work-ravelstone dykes-bike path home	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
+2014-07-02	18:00	Run	Default	10.71	Kilometer	0:53:17														Home via portabello	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
+2014-07-03		Run	Tempo	4.73	Kilometer	0:18:10														Meadows training			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-03		Run	Easy	9.84	Kilometer	0:57:20														Work-meadows-warmup-home			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-03		Run	Hill	3.65	Kilometer	0:12:50														Meadows training			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-04		Run	Default	2.40	Kilometer	0:0:00														office-gym			Brooks	Adrenaline GTS14	10.50	UK										
+2014-07-04		Run	Default	8.80	Kilometer	0:44:04														Work-ravelstone dykes-bike path home	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
+2014-07-04		Weights	0	0.00	Meter	0:0:00	68.5	kg																												
+2014-07-05		Run	Easy	14.91	Kilometer	1:12:22														Cramond			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-05		Run	Race	5.00	Kilometer	0:17:53														Silverknowes ParkRun 5k			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-06		Run	Long	27.81	Kilometer	2:05:43														EAC 16M loop			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-07		Run	Easy	6.66	Kilometer	0:0:00														Work-meadowbank-home	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
+2014-07-07		Weights	0	0.00	Meter	0:0:00	68.5	kg																												
+2014-07-08		Run	Easy	8.73	Kilometer	0:45:20	68.5	kg											+69-20m	Work-ravelstone dykes-bike path home	Asphalt		Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-08	18:20	Run	Default	18.42	Kilometer	1:34:11													+145m-205m	Work-corstorphine hill-cramond-home			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-09		Run	Default	4.60	Kilometer	0:0:00														Home-work			Brooks	Adrenaline GTS14	10.50	UK										
+2014-07-09		Run	Easy	10.80	Kilometer	0:0:00														Home via portabello	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
+2014-07-09		Weights	0	0.00	Meter	0:0:00	68.5	kg																												
+2014-07-10		Run	Easy	8.88	Kilometer	0:52:57														warmup etc.			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-10		Run	Interval	8.77	Kilometer	0:42:31													Grass loops by arthur's seat.<br>1 x loop start;<br><br>2 loops * 3 with 90s recovery<br>3 times 3 with 3min between groups<br><br>3.01, 3.03, 3.0x / 3.05, 3.03, 3.06 / 3.04, 3.09, 3.06<br>				Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-11		Weights	0	0.00	Meter	0:0:00	68.5	kg																												
+2014-07-11		Run	Easy	6.65	Kilometer	0:0:00														Office-gym-home via wol	Asphalt		Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-12		Run	Race	5.00	Kilometer	0:16:57										Overcast,Humid	14	C		Silverknowes ParkRun 5k			adidas	Adios Boost	11.00	UK		87.99	6	474						
+2014-07-12	8:45	Run	Default	14.90	Kilometer	1:12:18														Cramond			adidas	Adios Boost	11.00	UK		87.99								
+2014-07-13	9:00	Run	Long	32.95	Kilometer	2:28:41										Sunny,PartlyCloudy				EAC 16M loop			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-14		Badminton	Default	0.00	Kilometer	0:0:00	68.5	kg																												
+2014-07-14		Weights	0	0.00	Meter	0:0:00	68.5	kg																												
+2014-07-14		Run	Easy	10.80	Kilometer	0:0:00														Home via portabello	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
+2014-07-15		Run	Interval	4000.00	Meter	0:13:04														Meadowbank			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-15	8:00	Run	Default	8.80	Kilometer	0:44:13														Work-ravelstone dykes-bike path home	Asphalt		Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-15	18:15	Run	Default	11.77	Kilometer	0:59:44														Work-meadowbank-home	Asphalt		Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-16		Run	Race	1.00	Mile	0:4:54													3x1 relay	Meadows race	Asphalt	Sri Chinmoy self-transcendence summer race series, Meadows 5km etc.	adidas	adizero adios 2	11.00	UK		85.00								
+2014-07-16		Run	Easy	5.87	Kilometer	0:27:07														warmup etc.			adidas	adizero adios 2	11.00	UK		85.00								
+2014-07-16		Run	Default	6.01	Kilometer	0:29:27														meadows-home			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-16	8:00	Run	Default	8.71	Kilometer	0:44:50														Work-ravelstone dykes-bike path home	Asphalt		Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-17		Run	Easy	12.70	Kilometer	1:03:05														Work-meadows-warmup-home			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-17		Run	Easy	2.40	Kilometer	0:0:00														office-gym			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-17		Weights	0	0.00	Meter	0:0:00	68.5	kg																												
+2014-07-17		Run	Fartlek	8.94	Kilometer	0:40:29													1m fast, 1m easy * 5; * 3 with 5m easy in between	Meadows training			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-17	8:10	Run	Easy	5.56	Kilometer	0:28:48														Home-work			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-18		Run	Easy	4.42	Kilometer	0:23:07																	Brooks	Adrenaline GTS14	10.50	UK										
+2014-07-19		Run	Default	15.31	Kilometer	1:11:00														Cramond			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-19		Run	Race	5.00	Kilometer	0:19:15	68.5	kg												Silverknowes ParkRun 5k			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-20	8:00	Run	Long	40.01	Kilometer	3:12:39													slower running into town<br>w/ some around 10k pace trying to make start / catch up after taking wrong turn<br>easy enough then slightly progressive run with charlotte	EAC 16M loop			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-21		Badminton	Default	0.00	Kilometer	0:0:00	68.5	kg																												
+2014-07-21		Run	Easy	6.66	Kilometer	0:0:00														Work-meadowbank-home	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
+2014-07-22		Run	Easy	11.93	Kilometer	1:01:51														Work-meadowbank-home	Asphalt		Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-22		Run	Interval	7.96	Kilometer	0:47:11													200, 1min, 600, 3min * 6<br><br>32 1:54<br>33 1:59<br>33 1:56<br>34 1:49<br>34 2:00<br>33 1:56<br><br>4xgrass strides	Meadowbank			adidas	adizero adios 2	11.00	UK		85.00								
+2014-07-22	7:53	Run	Default	9.81	Kilometer	0:52:59														work-arthur's seat loop-home	Asphalt,Concrete,Treadmill		Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-22	18:00	Weights	0	0.00	Meter	0:0:00	68.5	kg																												
+2014-07-23		Run	Race	2.00	Mile	0:10:55														Meadows race	Asphalt	Sri Chinmoy self-transcendence summer race series, Meadows 5km etc.	Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-23		Run	Easy	8.62	Kilometer	0:43:48														Work-ravelstone dykes-bike path home	Asphalt		Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-23		Run	Easy	12.57	Kilometer	1:04:42														meadows-home			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-24		Run	Easy	11.37	Kilometer	1:10:34													cloud inversion over arthur's seat!				Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-24		Run	Interval	7.35	Kilometer	0:40:00													6 * grass triangle  (~770m) tempo  w/ 1min recovery<br>3 * same hard w/ 3min recovery<br><br>3:00<br>2:54<br>2:55<br>2:54<br>2:52<br>2:55<br><br>2:44<br>2:38<br>2:38	Meadows training			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-24		Run	Easy	8.64	Kilometer	0:44:58														Work-ravelstone dykes-bike path home	Asphalt		Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-25		Run	Easy	5.10	Kilometer	0:0:00														Gym-home via wol			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-25		Weights	0	0.00	Meter	0:0:00	68.5	kg																												
+2014-07-26		Run	Default	14.61	Kilometer	1:12:53														Cramond			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-26		Run	Race	5.00	Kilometer	0:18:10														Silverknowes ParkRun 5k			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-27	12:31	Run	Long	50.47	Kilometer	4:42:42.79										Overcast,Rain	16	C		Forth and Clyde & Union canals			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-28		Run	Tempo	5.47	Kilometer	0:24:26														Granton			adidas	Adios Boost	11.00	UK		87.99								
+2014-07-29		Weights	0	0.00	Meter	0:0:00	68.5	kg																												
+2014-07-29		Run	Default	9.93	Kilometer	0:55:10														work-arthur's seat loop-home	Asphalt,Concrete,Treadmill		Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-29		Run	Default	30.40	Kilometer	2:36:02													work-musselburgh-past seafront. back via path & bit off course<br>windy on return	Work-Musselburgh-Home	Asphalt,Concrete		Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-07-30		Run	Default	14.54	Kilometer	1:16:38														Corstorphine hill & woods - granton - home			Brooks	Adrenaline GTS14	10.50	UK										
+2014-07-30		Run	Easy	8.65	Kilometer	0:43:41														Work-ravelstone dykes-bike path home	Asphalt		Brooks	Adrenaline GTS14	10.50	UK										
+2014-07-31		Run	Interval	4.64	Kilometer	0:21:50													cont. relay, 300m half loop & jog back up to start. 'downhill' effort<br>55,58,58,56,56,54,?,55,56,57	Meadows training			adidas	adizero adios 2	11.00	UK		85.00								
+2014-07-31		Run	Easy	15.80	Kilometer	1:21:16														Work-meadows-warmup-home			adidas	adizero adios 2	11.00	UK		85.00								
+2014-07-31	8:12	Run	Easy	5.71	Kilometer	0:29:57														Home-work			adidas	adizero adios 2	11.00	UK		85.00								
+2014-08-01		Weights	0	0.00	Meter	0:0:00	68.5	kg																												
+2014-08-01		Run	Easy	2.40	Kilometer	0:0:00	68.5	kg												office-gym			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-08-01		Run	Default	8.73	Kilometer	0:42:53																	Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-08-02		Run	Race	5.00	Kilometer	0:17:56	68.5	kg												Silverknowes ParkRun 5k			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-08-02		Run	Default	15.31	Kilometer	1:12:39																	Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-08-03	7:28	Run	Default	34.48	Kilometer	5:35:50.74										Rain,PartlyCloudy	14	C																		
+2014-08-04		Run	Easy	6.65	Kilometer	0:0:00	68.5	kg												Office-gym-home via wol	Asphalt		Brooks	Adrenaline GTS 14	11.50	UK	11.5	84.00								
+2014-08-04		Weights	0	0.00	Meter	0:0:00	68.5	kg																												
+2014-08-05		Run	Default	8.72	Kilometer	0:42:06														Work-ravelstone dykes-bike path home	Asphalt															
+2014-08-05		Run	Default	17.86	Kilometer	1:30:16														Work-corstorphine hill-cramond-home																
+2014-08-06		Run	Default	21.35	Kilometer	1:57:07																	adidas	Adizero XT	11.00	UK		80.00								
+2014-08-06		Run	Race	4.80	Kilometer	0:21:15														North Berwick Law Race	Asphalt,Treadmill,Trail		adidas	Adizero XT	11.00	UK		80.00	12	271						
+2014-08-06		Run	Default	8.71	Kilometer	0:43:56														Work-ravelstone dykes-bike path home	Asphalt															
+2014-08-07		Run	Race	1.00	Mile	0:4:57														Meadows training			adidas	adizero adios 2	11.00	UK		85.00								
+2014-08-07		Run	Interval	6.97	Kilometer	0:31:20													3*8m 3'46 3'40 3'46 pace	Meadows training			adidas	adizero adios 2	11.00	UK		85.00								
+2014-08-07		Run	Easy	11.44	Kilometer	0:52:44														Work-meadows-warmup-home			adidas	adizero adios 2	11.00	UK		85.00								
+2014-08-07		Weights	0	0.00	Meter	0:0:00	68.5	kg																												
+2014-08-07	8:07	Run	Easy	7.20	Kilometer	0:36:54														Arthur's seat			Brooks	Adrenaline GTS 14	11.50	UK	11.5	84.00								
+2014-08-08		Run	Easy	8.70	Kilometer	0:43:06														Work-ravelstone dykes-bike path home	Asphalt		Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-08-09		Run	Race	5.00	Kilometer	0:19:37														Silverknowes ParkRun 5k			Brooks	Adrenaline GTS 14	11.50	UK	11.5	84.00								
+2014-08-09		Run	Easy	2.65	Kilometer	0:0:00														warmup etc.			adidas	Adios Boost	11.00	UK		87.99								
+2014-08-09	14:00	Run	Race	21.10	Kilometer	1:19:45										Sunny,Windy,PartlyCloudy	18	C	Quite hot, quite a bit of wind. Course a bit hilly but not too bad, looks good. <br><br>Bit of a stitch at mile 8 or so for  a few miles, felt stronger later. 	Haddington Half Marathon			adidas	Adios Boost	11.00	UK		87.99								
+2014-08-10	9:00	Run	Long	30.04	Kilometer	2:18:28													extra reservoir loop	EAC 16M loop			Saucony	Excursion TR7	10.50	UK										
+2014-08-11		Run	Default	15.88	Kilometer	1:12:18													Good pace. Feeling easy into the wind. 	Cramond			Brooks	Adrenaline GTS 14	11.50	UK	11.5	84.00								
+2014-08-12		Run	Easy	15.61	Kilometer	1:17:53														Meadowbank-home	Asphalt,Concrete		adidas	adizero adios 2	11.00	UK		85.00								
+2014-08-12		Run	Interval	6.70	Kilometer	0:34:18													4x200/1m/800/3m  * 3<br>35.5, 37.2, 36.5, 36.9<br>2:32<br>36.7, 36.5, 36.2, 36.3<br>2:33<br>37.0, 35.3, 36.3, 37.1<br>2:32	Meadowbank			adidas	adizero adios 2	11.00	UK		85.00								
+2014-08-12	10:00	Run	Easy	10.80	Kilometer	0:0:00														Home-gym-home (wol)	Asphalt		Brooks	Adrenaline GTS 14	11.50	UK	11.5	84.00								
+2014-08-13		Run	Default	10.61	Kilometer	0:51:23																	Brooks	Adrenaline GTS 14	11.50	UK	11.5	84.00								
+2014-08-13	20:14	Run	Easy	20.31	Kilometer	1:44:45														Cramond			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-08-14		Run	Easy	16.84	Kilometer	1:23:09														Home-meadows via holyrood			adidas	adizero adios 2	11.00	UK		85.00								
+2014-08-14		Run	Interval	5.45	Kilometer	0:26:55													Grass triangle, running sides<br>1, 2, 3, 4, 4, 3, 2, 1<br>~220m,470m,650m,840m	Meadows training			adidas	adizero adios 2	11.00	UK		85.00								
+2014-08-14	12:22	Run	Easy	7.84	Kilometer	0:39:35														Seafield via leith links			Brooks	Adrenaline GTS 14	11.50	UK	11.5	84.00								
+2014-08-15		Run	Easy	7.94	Kilometer	0:38:32														Cramond			Brooks	Adrenaline GTS 14	11.50	UK	11.5	84.00								
+2014-08-16		Run	Race	16.93	Kilometer	1:19:56	68.5	kg												Cramond			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-08-16		Run	Race	5.00	Kilometer	0:18:23														Silverknowes ParkRun 5k			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								
+2014-08-17	7:54	Run	Long	50.99	Kilometer	4:00:52										PartlyCloudy	12	C	EAC 14M loop, there & back via cycle path+wol (12k ea) & out&back on canal after main loop.<br><br>50k just under 4h by the watch. 10-15m break at 1h at craiglockhart otherwise pretty much continuous.	EAC 16M loop			Brooks	Adrenaline  GTS 14	10.50	UK	Scotland	90.00								

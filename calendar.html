@@ -3,89 +3,26 @@
 <head>
     <title>Run Calendar</title>
     <meta charset="utf-8">
-    <style>
-        body {
-            font: 10px sans-serif;
-            shape-rendering: crispEdges;
-        }
-
-        .day {
-            fill: #fff;
-            stroke: #ccc;
-        }
-
-        .month {
-            fill: none;
-            stroke: #000;
-            stroke-width: 2px;
-        }
-
-
-        /* http://tristen.ca/hcl-picker/#/clh/8/247/0D2A51/8BA2E5 */
-
-        .hcl2 .q0 {
-            fill: #151F29;
-        }
-
-        .hcl2 .q1 {
-            fill: #19333E;
-        }
-
-        .hcl2 .q2 {
-            fill: #194A50;
-        }
-
-        .hcl2 .q3 {
-            fill: #1B625F;
-        }
-
-        .hcl2 .q4 {
-            fill: #267A69;
-        }
-
-        .hcl2 .q5 {
-            fill: #3E926D;
-        }
-
-        .hcl2 .q6 {
-            fill: #5FAA6D;
-        }
-
-        .hcl2 .q7 {
-            fill: #87C16A;
-        }
-
-        .hcl2 .q8 {
-            fill: #B6D566;
-        }
-
-        .hcl2 .q9 {
-            fill: #EAE865;
-        }
-
-        .key {
-            margin-top: 15px;
-        }
-
-        .week {
-            fill: #E7E7E7;
-            stroke: #ccc;
-        }
-
-        .weekAxis text {
-            font: 10px sans-serif;
-        }
-
-        .weekAxis path,
-        .weekAxis line {
-            fill: none;
-            stroke: #000;
-            shape-rendering: crispEdges;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script data-main="calendar" src="require.js"></script>
 </head>
 <body>
-    <script src="d3.js"></script>
-    <script src="calendar.js"></script>
+  <div>
+    Upload data (RunningAhead csv format):
+    <input type="file" id="upload_ra">
+
+
+    <input type="button" id="connect_strava" value="Connect to Strava">
+
+    Data sources:
+    <select multiple="true" id="data_sources">
+    </select>
+
+    <label>Show years:
+      <select id="years"></select></label>
+    <label>Show weeks:<input type="checkbox" id="showweeks" checked="checked"></input></label>
+
+
+  </div>
 </body>
 </html>
