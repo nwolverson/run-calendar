@@ -36,7 +36,7 @@ define(["d3"], function(d3) {
   var color = fixedRange.range(colorClasses);
 
   function createChart(data, start, end, showWeeks) {
-      var max = d3.max(d3.values(data));
+      var max = d3.max(data.values());
       var scaledRange = d3.scale.quantize().domain([0, max]);
 
       // Create the rows

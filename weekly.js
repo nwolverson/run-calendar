@@ -1,5 +1,4 @@
 /// <reference path="d3.v3.js" />
-
 // TODO share with calendar.js
 require.config({
   paths: {

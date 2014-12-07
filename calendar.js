@@ -81,6 +81,14 @@ filesel.on("change", function() {
   setupDataList();
 });
 
+
+var fileselstr = d3.select("#upload_strava");
+fileselstr.on("change", function() {
+  var upload = fileselstr.node(), file = upload.files[0];
+  allData.push(strava.fromFile(file.name)); // TODO weird only works from same dir
+  setupDataList();
+});
+
 d3.select("#connect_strava").on("click", function () {
   var stravaUrl = "https://www.strava.com/oauth/authorize?client_id=2746&response_type=code&redirect_uri=http://localhost:8123/token_exchange&scope=public&state=mystate&approval_prompt=force";
   var popup = window.open(stravaUrl, 'login', 'height=500,width=800');

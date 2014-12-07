@@ -14,12 +14,21 @@ define(function() {
     return data;
   }
 
-  function fetchStravaLatest(datum, callback) {
+  function fetchStravaLatest(datum, page, callback, acc) {
+    acc = acc || [];
     var url = "https://www.strava.com/api/v3/athlete/activities?per_page=200" +
+      "&page=" + page +
       "&access_token=" + datum.token + "&callback={callback}";
 
     d3.jsonp(url, function(data) {
-      callback(null, data);
+      //var start = data[data.length-1].start_date;
+      //var end = data[0].start_date;
+      acc = acc.concat(data);
+      if (data.length < 200) {
+        callback(null, acc);
+      } else {
+        fetchStravaLatest(datum, page+1, callback, acc);
+      }
     });
   }
 
@@ -37,7 +46,7 @@ define(function() {
 
   */
   function makeItem(key, token) {
-    return { type: key, file: (new Date()).toDateString(), token: args }
+    return { type: key, file: (new Date()).toDateString(), token: token }
   }
 
   return {
