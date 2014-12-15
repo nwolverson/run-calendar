@@ -4,3 +4,4 @@ obj/
 *.suo
 node_modules/
 output/
+activities.json
