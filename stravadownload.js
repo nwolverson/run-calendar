@@ -10,7 +10,7 @@ require.config({
   }
 });
 
-var token = "INSERT_TOKEN";
+var token = "90c08839b0254904d57d81d6ff3768f54a1a8767";
 
 require(["strava", "d3", "jsonp"], function (strava, d3, jsonp) {
 

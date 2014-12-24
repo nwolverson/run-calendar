@@ -16,12 +16,16 @@ console.log("Generating for week: "+ date);
 page.open("weekly.html", function(status) {
     page.evaluate(function(date) {
       require(["weeklychart"], function (weekly) {
-        weekly.chartWeek(date, function() { window.callPhantom(); });
+        weekly.chartWeek(date, function(_data, error) { window.callPhantom(!!error); });
       })
     }, date);
 });
 
-page.onCallback = function(data) {
+page.onCallback = function(isError) {
+  if (isError) {
+    console.log("Error, not generating weekly graph.")
+    phantom.exit();
+  }
 
   var output = page.evaluate(function() {
     d3.select("body").style("margin", 0);

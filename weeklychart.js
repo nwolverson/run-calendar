@@ -44,8 +44,12 @@ define(["d3", "dataloader", "runningahead", "strava"], function (d3, dataloader,
 
   function chartWeek(date, callback) {
     dataloader.loadData(dataSources, (function (data) {
-      createWeekChart(data, date);
-      callback();
+      try {
+        createWeekChart(data, date);
+        callback(null, null); // data, error
+      } catch (e) {
+        callback(null, e);
+      }
     }));
   }
 
