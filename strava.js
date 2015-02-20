@@ -7,7 +7,8 @@ define(function() {
       })
       .rollup(function (runs) {
         var total = 0;
-        runs.forEach(function (r) { total += r.distance; });
+        runs.filter(function (r) { return r.type == "Run"; })
+          .forEach(function (r) { total += r.distance; });
         return total / 1000;
       })
       .map(json);
