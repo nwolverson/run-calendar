@@ -6,6 +6,4 @@ node_modules/
 output/
 activities.json
 bower_components/
-bower.json
-Gruntfile.js
 .psci
