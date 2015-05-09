@@ -3,18 +3,9 @@ page.viewportSize = { width: 1018 , height: 140 };
 
 var system = require("system");
 
-page.open("calendar.html", function(status) {
+page.open("http://localhost:8000", function(status) {
     page.evaluate(function() {
-      require(["d3", "dataloader", "calendarchart", "strava", "runningahead"],
-        function (d3, dataloader, calendarchart, strava, ra) {
-          dataloader.loadData([
-              ra.fromFile("log.txt"),
-              strava.fromFile("activities.json")
-            ], function (data) {
-              calendarchart.createChart(data, 2014, 2015, true);
-              window.callPhantom();
-            });
-      });
+      PS.CalendarChart_Main.mainMonths();
     });
 });
 

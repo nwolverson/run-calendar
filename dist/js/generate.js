@@ -13,11 +13,9 @@ if (args.length < 2)
 var date = args[1];
 console.log("Generating for week: "+ date);
 
-page.open("weekly.html", function(status) {
+page.open("http://localhost:8000", function(status) {
     page.evaluate(function(date) {
-      require(["weeklychart"], function (weekly) {
-        weekly.chartWeek(date, function(_data, error) { window.callPhantom(!!error); });
-      })
+      PS.CalendarChart_Main.mainWeek(new Date(date))();
     }, date);
 });
 
@@ -29,7 +27,7 @@ page.onCallback = function(isError) {
 
   var output = page.evaluate(function() {
     d3.select("body").style("margin", 0);
-    return d3.select("div.chart").html();
+    return d3.select("div.weekchart").html();
   });
 
   var outFile = "output/week-" + date;

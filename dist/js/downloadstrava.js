@@ -15,7 +15,7 @@ page.onCallback = function(data) {
   console.log("Downloaded Strava: " + (data.length) + " entries");
 
   var fs = require("fs");
-  fs.write("activities.json", output, "w");
+  fs.write("data/activities.json", output, "w");
 
   phantom.exit();
 };
