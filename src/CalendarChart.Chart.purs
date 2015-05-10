@@ -8,10 +8,12 @@ import Graphics.D3.Request
 import Graphics.D3.SVG.Axis
 
 import Data.Date
+import Data.Date.UTC
 import Data.Enum
 import Data.Map
 import Data.Maybe
 import Data.Tuple
+import Data.Int(fromNumber)
 import qualified Data.Array as Arr
 
 import CalendarChart.Util
@@ -42,7 +44,7 @@ chartDays input date count = do
       height = 30 - margin.top - margin.bottom
       dates = dayRange date count
   ysc <- linearScale
-    .. domain [0, max (flip dayval input) dates]
+    .. domain [0, max' val dates]
     .. range [0, 30]
     .. toFunction
   svg <- rootSelect "div.weekchart"
@@ -64,14 +66,22 @@ succWrap x = case succ x of
   Just a -> a
   Nothing -> firstEnum
 
+-- date as it used to be...
+date' :: Number -> Month -> Number -> Maybe Date
+date' yearN month dayN =
+  date year month day
+  where
+    year = Year $ fromNumber yearN
+    day = DayOfMonth $ fromNumber dayN
+
 lastDay :: Number -> Month -> Maybe Date
 lastDay year month = case succ month of
-  Nothing -> date (year+1) January 0
-  Just m -> date year m 0 -- 0th day is end of last month
+  Nothing -> date' (year+1) January 0
+  Just m -> date' year m 0 -- 0th day is end of last month
 
 monthPath :: Number -> Month -> Number -> Maybe String
 monthPath year month cellSize = do
-  t0 <- date year month 1
+  t0 <- date' year month 1
   t1 <- lastDay year month
   let day d = ((fromEnum $ dayOfWeek d) + 6) % 7
   let w0 = week t0
@@ -84,7 +94,7 @@ monthPath year month cellSize = do
 
 yearRange year = Arr.mapMaybe dayOf yearRange'
   where
-    start = date year January 01
+    start = date' year January 1
     yearRange' = fromMaybe [] $ Arr.mapMaybe <$> (addDays <$> start) <*> Just (Arr.range 0 364)
 
 monthTotal :: Map Date Number -> Date -> Number
@@ -137,7 +147,7 @@ monthChart input yearSelect =
       .. attr' "x" (\d -> (week d) * cellSize)
 
     update ... append "title"
-      .. text' show
+      .. text' (\d -> fullDateFormat (toJSDate d))
 
     svg ... append "text"
       .. attr "class" "yearTitle"
@@ -146,7 +156,7 @@ monthChart input yearSelect =
       .. text' (\d -> show d)
 
     svg ... selectAll' ".monthTotal"
-        .. bind' (\y -> Arr.mapMaybe (\m -> date y m 1) $ enumFromTo January December)
+        .. bind' (\y -> Arr.mapMaybe (\m -> date' y m 1) $ enumFromTo January December)
       .. enter .. append "text"
         .. attr "class" "monthTotal"
         .. attr' "x" (\d -> show ((fromMaybe 0 $ week <$> monday d) * cellSize))

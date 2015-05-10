@@ -1,6 +1,8 @@
 module CalendarChart.Activities where
 
 import Data.Date
+import Data.Time
+import Data.Date.UTC
 import Data.Enum
 import Data.Map
 import Data.Tuple
@@ -26,7 +28,7 @@ data Activity = Activity ActivityR
 instance showActivity :: Show Activity where
   show (Activity { date = d, distance = n, type = t }) = show d ++ ": " ++ show n
 
-dayOf d = date (year d) (month d) (day d)
+dayOf d = date (year d) (month d) (dayOfMonth d)
 actToTuple (Activity { date: d, distance: n }) = Tuple d n
 sameDay { date: d1 } { date: d2 } = dayOf d1 == dayOf d2
 dayAct :: ActivityR -> Maybe ActivityR
@@ -60,7 +62,7 @@ dayval k input =
 
 addDays d n =
   let milsPerDay = 1000 * 60 * 60 * 24
-      addDay ms = ms + (milsPerDay * n)
+      addDay (Milliseconds ms) = Milliseconds (ms + (milsPerDay * n))
   in fromEpochMilliseconds <$> addDay $ toEpochMilliseconds d
 
 weekFormat = formatDate "%W"

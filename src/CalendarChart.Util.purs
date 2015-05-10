@@ -26,36 +26,6 @@ format = ffi ["fmt"] "d3.format(fmt)"
 
 parseInt = Global.readInt 10
 
-unsafeDomain = ffi ["domain", "scale", ""] "scale.domain(domain)"
-unsafeRange = ffi ["values", "scale", ""] "scale.range(values)"
-unsafeCopy = ffi ["scale", ""] "scale.copy()"
-unsafeToFunction = ffi ["scale", ""] "scale.copy()"
-unsafeInvert = ffi ["scale", ""] "scale.copy().invert"
-unsafeRangeRound = ffi ["values", "scale", ""] "scale.rangeRound(values)"
-unsafeInterpolate = ffi ["factory", "scale", ""] "scale.interpolate(factory)"
-unsafeClamp = ffi ["bool", "scale", ""] "scale.clamp(bool)"
-unsafeNice count = case count of
-  Nothing -> ffi ["scale", ""] "scale.nice()"
-  Just c -> ffi ["count", "scale", ""] "scale.nice(count)" c
-unsafeTicks count = case count of
-  Nothing -> ffi ["scale", ""] "scale.ticks()"
-  Just c -> ffi ["count", "scale", ""] "scale.ticks(count)" c
-unsafeTickFormat count format = case format of
-  Nothing -> ffi ["count", "scale", ""] "scale.tickFormat(count)" count
-  Just f -> ffi ["count", "format", "scale", ""] "scale.tickFormat(count, format)" count f
-
-
-foreign import data ThresholdScale :: * -> * -> *
-
-foreign import thresholdScale "var thresholdScale = d3.scale.threshold"
-  :: forall r. D3Eff (ThresholdScale Number r)
-
-instance scaleThreshold :: Scale ThresholdScale where
-  domain = unsafeDomain
-  range = unsafeRange
-  copy = unsafeCopy
-  toFunction = unsafeToFunction
-
 selectionFilter :: forall d. String -> Selection d -> D3Eff (Selection d)
 selectionFilter = unsafeForeignFunction ["selector", "selection", ""] "selection.filter(selector)"
 
@@ -68,9 +38,13 @@ parseTsv = ffi ["str"] "d3.tsv.parse(str)"
 
 
 unsafeOnEvent :: forall eff a i r. String -> (i -> Eff eff r) -> (Selection a) -> D3Eff (Selection a)
-unsafeOnEvent = ffi ["eventName", "callback", "selection", ""] "selection.on('change', function() { return callback()(); })"
+unsafeOnEvent = ffi ["eventName", "callback", "selection", ""] "selection.on(eventName, function(data) { return callback(data)(); })"
 
+onChange :: forall eff a r. (Foreign -> Eff eff r) -> (Selection a) -> D3Eff (Selection a)
 onChange = unsafeOnEvent "change"
+
+onClick' :: forall eff a r. (Foreign -> Eff eff r) -> (Selection a) -> D3Eff (Selection a)
+onClick' = unsafeOnEvent "click"
 
 nodeFiles :: forall a. Selection a -> Foreign
 nodeFiles = ffi ["selection"] "selection.node() !== null ? Array.prototype.slice.call(selection.node().files) : null"
@@ -100,6 +74,12 @@ readAsText = ffi ["fr", "file", "callback"]
   return {};
 }"""
 
+openWindow :: forall a. String -> String -> String -> Eff (d :: DOM | a) Unit
+openWindow = ffi ["url", "windowName", "features", ""] "window.open(url,windowName,features)"
+
+-- ugh, stringify to parse...
+jsonp :: String -> (String -> Eff _ Unit) -> Eff _ Unit
+jsonp = ffi ["url", "cb", ""] "d3.jsonp(url, function(d) { cb(JSON.stringify(d))(); });"
 
 -- oh dear.
 callPhantom :: Boolean -> D3Eff Unit

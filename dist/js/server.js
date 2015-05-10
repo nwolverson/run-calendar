@@ -4,7 +4,7 @@ var finalhandler = require('finalhandler')
 var serveStatic = require('serve-static')
 var http = require('http');
 
-var serve = serveStatic('/Users/nicholaw/git/run-calendar/', {'index': ['index.html', 'index.htm']});
+var serve = serveStatic('/Users/nicholaw/git/run-calendar/dist/', {'index': ['interactive.html']});
 
 http.createServer(function (req, res) {
   var url = require('url').parse(req.url, true);
@@ -25,7 +25,7 @@ http.createServer(function (req, res) {
 
       var data = JSON.parse(body);
 
-      var response = "<html><body><script>window.opener.loadedStrava('" + data.access_token + "'); window.close()</script></body></html>"
+      var response = "<html><body><script>window.opener.PS.CalendarChart_Main.downloadedStrava('" + data.access_token + "')(); window.close()</script></body></html>"
 
       res.end(response);
 
