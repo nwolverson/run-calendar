@@ -3,8 +3,8 @@ module CalendarChart.Main where
 import Data.Maybe
 
 import Data.JSON
-import Network.XHR
-import Control.Monad.Cont.Trans
+--import Network.XHR
+--import Control.Monad.Cont.Trans
 import Control.Monad.Trans
 
 import Graphics.D3.Base
@@ -24,6 +24,9 @@ import Data.Date
 import Control.Monad.Eff
 import qualified Browser.WebStorage as WS
 
+import Network.HTTP.Affjax
+import Control.Monad.Aff(launchAff)
+
 chartMonths :: [ Activity ] -> D3Eff (Unit)
 chartMonths x = void $ monthCharts (buildMap x) 2014 2
 
@@ -36,10 +39,10 @@ getAjax fileName = ContT $ \cb ->
     getResponseText response >>= cb } fileName {}
 
 fetchCont chartf = do
-  strava <- getAjax "data/activities.json"
+  strava <- get "data/activities.json"
   let vals = fromMaybe [] $ decode strava
-  ra <- getAjax "data/log.txt"
-  pp <- lift $ getRAfromText ra
+  ra <- get "data/log.txt"
+  pp <- liftEff $ getRAfromText ra
   let acts = filter (\(Activity a) -> a.type == Run) $ vals ++ pp
   lift $ chartf $ acts
   return $ callPhantom false
@@ -49,10 +52,10 @@ mainWeek1 jsd = do
   fetchCont $ chartWeek dt
   --lift $ void $ trace "hello"
 
-mainWeek jsd = runContT (mainWeek1 jsd) void
+mainWeek jsd = launchAff (mainWeek1 jsd)
 --mainWeekW jsd = mainWeek jsd (trace "goodbye")
 
-mainMonths = runContT (fetchCont chartMonths) void
+mainMonths = launchAff (fetchCont chartMonths)
 
 chart = chartMonths <<< filter (\(Activity a) -> a.type == Run)
 
