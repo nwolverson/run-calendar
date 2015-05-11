@@ -3,9 +3,6 @@ module CalendarChart.Main where
 import Data.Maybe
 
 import Data.JSON
-import Network.XHR
-import Control.Monad.Cont.Trans
-import Control.Monad.Trans
 
 import Graphics.D3.Base
 import Graphics.D3.Util
@@ -24,35 +21,35 @@ import Data.Date
 import Control.Monad.Eff
 import qualified Browser.WebStorage as WS
 
+import Network.HTTP.Affjax
+import Control.Monad.Eff.Class(liftEff)
+import Control.Monad.Aff(launchAff,Aff())
+
 chartMonths :: [ Activity ] -> D3Eff (Unit)
 chartMonths x = void $ monthCharts (buildMap x) 2014 2
 
 chartWeek :: Date -> [ Activity ] -> D3Eff (Unit)
 chartWeek date x = void $ chartDays (buildMap x) date 7
 
-getAjax fileName = ContT $ \cb ->
-  void $ get defaultAjaxOptions
-  { onReadyStateChange = onSuccess $ \response ->
-    getResponseText response >>= cb } fileName {}
-
+fetchCont :: ([Activity] -> D3Eff (Unit)) -> Aff _ Unit
 fetchCont chartf = do
-  strava <- getAjax "data/activities.json"
-  let vals = fromMaybe [] $ decode strava
-  ra <- getAjax "data/log.txt"
-  pp <- lift $ getRAfromText ra
+  strava <- get "data/activities.json"
+  let vals = fromMaybe [] $ decode $ strava.response
+  ra <- get "data/log.txt"
+  pp <- liftEff $ getRAfromText ra.response
   let acts = filter (\(Activity a) -> a.type == Run) $ vals ++ pp
-  lift $ chartf $ acts
-  return $ callPhantom false
+  liftEff $ do
+    chartf acts
+    callPhantom false
 
-mainWeek1 jsd = do
-  let dt = Data.Maybe.Unsafe.fromJust $ fromJSDate jsd
-  fetchCont $ chartWeek dt
-  --lift $ void $ trace "hello"
+mainWeek :: JSDate -> Eff _ Unit
+mainWeek jsd =
+  launchAff (fetchCont $ chartWeek dt)
+  where
+    dt :: Date
+    dt = Data.Maybe.Unsafe.fromJust $ fromJSDate jsd
 
-mainWeek jsd = runContT (mainWeek1 jsd) void
---mainWeekW jsd = mainWeek jsd (trace "goodbye")
-
-mainMonths = runContT (fetchCont chartMonths) void
+mainMonths = launchAff (fetchCont chartMonths)
 
 chart = chartMonths <<< filter (\(Activity a) -> a.type == Run)
 

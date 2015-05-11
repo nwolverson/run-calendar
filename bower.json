@@ -21,11 +21,11 @@
     "purescript-sets": "~0.3.0",
     "purescript-maps": "~0.3.1",
     "purescript-transformers": "~0.5.1",
-    "purescript-xhr": "~0.4.0",
     "purescript-foldable-traversable": "~0.3.0",
     "purescript-json": "~0.4.7",
     "purescript-dom": "~0.1.2",
-    "purescript-webstorage": "~0.3.0"
+    "purescript-webstorage": "~0.3.0",
+    "purescript-affjax": "~0.2.1"
   },
   "resolutions": {
     "purescript-maps": "~0.3.1",
