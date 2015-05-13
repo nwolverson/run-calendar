@@ -3,9 +3,13 @@
   "version": "0.0.0",
   "description": "",
   "main": "index.js",
-  "dependencies": {},
+  "dependencies": {
+    "grunt-contrib-copy": "^0.8.0",
+    "virtual-dom": "^2.0.1"
+  },
   "devDependencies": {
     "grunt": "^0.4.5",
+    "grunt-browserify": "^3.8.0",
     "grunt-contrib-connect": "^0.9.0",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-purescript": "^0.6.0"

@@ -34,15 +34,15 @@ sameDay { date: d1 } { date: d2 } = dayOf d1 == dayOf d2
 dayAct :: ActivityR -> Maybe ActivityR
 dayAct a = a { date = _ } <$> dayOf (a.date)
 
-combine :: Maybe Activity -> Activity -> Maybe Activity
-combine a1 (Activity { date: d2, distance: n2, type: t }) =
+combine1 :: Maybe Activity -> Activity -> Maybe Activity
+combine1 a1 (Activity { date: d2, distance: n2, type: t }) =
   do
     Activity a <- a1
     d <- dayOf (a.date)
     return $ Activity $ a { distance = (a.distance) + n2 }
 
 combineA :: [Activity] -> Maybe Activity
-combineA ((Activity h):t) = foldlArray combine (Activity <$> dayAct h) t
+combineA ((Activity h):t) = foldlArray combine1 (Activity <$> dayAct h) t
 combineA [] = Nothing
 
 buildMap :: [ Activity ] -> Map Date Number

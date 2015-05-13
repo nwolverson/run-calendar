@@ -4,11 +4,11 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
 
-    srcFiles: ["bower_components/**/src/**/*.purs", "src/**/*.purs"],
+    srcFiles: ["bower_components/**/src/**/*.purs", "!bower_components/**/examples/**/*.purs", "src/**/*.purs"],
 
     psc: {
       options: {
-        main: false, // "CalendarChart.Main",
+        main: "CalendarChart.Main",
         modules: ["CalendarChart.Main"]
       },
       all: {
@@ -17,13 +17,42 @@ module.exports = function(grunt) {
       }
     },
 
+    pscMake: {
+      options: {
+        main: "CalendarChart.Main"
+      },
+      all: {
+        src: ["<%=srcFiles%>"],
+        dest: "build"
+      }
+    },
+
     dotPsci: {
       src: ["src/**/*.purs", "bower_components/**/src/**/*.purs"]
     },
 
+     copy: [
+      {
+        src :['src/main.js'],
+        dest: 'tmp/main.js'
+      },
+      {
+        expand: true,
+        cwd: "build",
+        src: ["**"],
+        dest: "tmp/node_modules/"
+      }
+    ],
+
+    browserify: {
+      all: {
+        src: ["tmp/main.js"],
+        dest: "dist/js/Main.js"
+      }
+    },
     watch: {
       files: "**/*.purs",
-      tasks: ["psc", "dotPsci"],
+      tasks: ["pscMake", "copy", "browserify"],
       options: {
         livereload: true
       }
@@ -39,11 +68,13 @@ module.exports = function(grunt) {
   });
 
   grunt.loadNpmTasks("grunt-purescript");
+  grunt.loadNpmTasks("grunt-contrib-copy");
 
   grunt.loadNpmTasks("grunt-contrib-watch");
   grunt.loadNpmTasks('grunt-contrib-connect');
+  grunt.loadNpmTasks('grunt-browserify');
 
-  grunt.registerTask("default", ["psc:all", "dotPsci"]);
+  grunt.registerTask("default", ["pscMake", "copy", "browserify", "dotPsci"]);
 
   grunt.registerTask("w", ["connect", "watch"]);
 };

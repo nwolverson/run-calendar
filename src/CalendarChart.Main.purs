@@ -17,6 +17,7 @@ import CalendarChart.Util
 import Data.Array(map,mapMaybe,length,filter)
 import Debug.Trace
 import Data.Date
+import Data.Tuple
 
 import Control.Monad.Eff
 import qualified Browser.WebStorage as WS
@@ -24,6 +25,7 @@ import qualified Browser.WebStorage as WS
 import Network.HTTP.Affjax
 import Control.Monad.Eff.Class(liftEff)
 import Control.Monad.Aff(launchAff,Aff())
+
 
 chartMonths :: [ Activity ] -> D3Eff (Unit)
 chartMonths x = void $ monthCharts (buildMap x) 2014 2
@@ -117,6 +119,8 @@ mainInteractive = do
   ss ... onChange cb
   scs ... onClick' downloadStrava
 
+  HalogenStuff.main
+
   return rs
 
-main = mainMonths
+main = mainInteractive
