@@ -14,18 +14,40 @@ import CalendarChart.Strava
 import CalendarChart.RA
 import CalendarChart.Util
 
-import Data.Array(map,mapMaybe,length,filter)
+import Data.Array(map,mapMaybe,length,filter,concat)
 import Debug.Trace
 import Data.Date
 import Data.Tuple
 
 import Control.Monad.Eff
+
+import Control.Monad.Eff.Class
 import qualified Browser.WebStorage as WS
 
 import Network.HTTP.Affjax
 import Control.Monad.Eff.Class(liftEff)
 import Control.Monad.Aff(launchAff,Aff())
 
+
+
+-- import Data.Void
+import Data.Either
+import Control.Bind
+import DOM
+import Data.DOM.Simple.Document
+import Data.DOM.Simple.Element
+import Data.DOM.Simple.Types
+import Data.DOM.Simple.Window
+import Halogen
+import Halogen.Signal
+import Halogen.Component
+import qualified Halogen.HTML as H
+import qualified Halogen.HTML.Attributes as A
+import qualified Halogen.HTML.Events as A
+import qualified Halogen.HTML.Events.Handler as E
+import qualified Halogen.HTML.Events.Monad as E
+import Control.Functor (($>))
+import Control.Plus (empty)
 
 chartMonths :: [ Activity ] -> D3Eff (Unit)
 chartMonths x = void $ monthCharts (buildMap x) 2014 2
@@ -94,33 +116,66 @@ fetchStrava page token = do
   jsonp url (\result -> do
     trace "fetched strava data"
     let stravaData = getStravaFromText result
-    cb <- combinedCallback stravaData
-    cb unit
+    -- cb <- combinedCallback stravaData
+    -- cb unit
+    return unit
   )
 
-combinedCallback extra = do
-  rs <- rootSelect "input#upload_ra"
-  ss <- rootSelect "input#upload_strava"
-  return $ changeCallback ss (\str ->
-    changeCallback rs (\str2 ->
-      do
-        ra <- getRAfromText str2
-        let sa = getStravaFromText str
-        chart $ ra++sa++extra) unit)
+appendToBody :: forall eff. HTMLElement -> Eff (dom :: DOM | eff) Unit
+appendToBody e = document globalWindow >>= (body >=> flip appendChild e)
+
+-- | The state of the application
+data State = State [[Activity]]
+
+-- | Inputs to the state machine
+data Input = Data [Activity] | CurrentState [[Activity]]
+
+ui :: Component (E.Event (HalogenEffects _)) Input Input
+ui = render <$> stateful (State []) update
+  where
+  render :: State -> H.HTML (E.Event (HalogenEffects _) Input)
+  render (State s) = H.div_
+    [ H.text "Upload data (RunningAhead csv format): "
+    , H.input [ A.type_ "file", A.onChange $ \e -> pure (do
+        text <- E.async $ case getElementFile e.target of
+          Nothing -> return ""
+          Just f -> readAsTextAff (fileReader unit) (fileAsBlob f)
+        liftEff $ trace "Got RA data"
+        ra <- liftEff $ getRAfromText text
+        pure (Data ra) <> pure (CurrentState $ ra:s)
+      ) ] []
+    , H.text "Upload data (Strava saved JSON format): "
+    , H.input [ A.type_ "file", A.onChange $ \e -> pure (do
+        text <- E.async $ case getElementFile e.target of
+          Nothing -> return ""
+          Just f -> readAsTextAff (fileReader unit) (fileAsBlob f)
+        liftEff $ trace "Got Strava data"
+        let sa = getStravaFromText text
+        pure (Data sa) <> pure (CurrentState $ sa:s)
+      ) ] []
+
+    , H.button [ A.onClick $ \_ -> pure (do
+        liftEff $ downloadStrava unit
+        empty
+      ) ] [ H.text "Connect to Strava"]
+
+    , H.p_ [ H.text $ "Files uploaded: " ++ show (length s) ]
+
+    , H.div [ A.classes [A.className "monthchart", A.className "hcl2"] ] []
+    ]
+
+  update :: State -> Input -> State
+  update (State s) (Data a) = State (a:s)
+  update s _ = s
 
 mainInteractive = do
-  rs <- rootSelect "input#upload_ra"
-  ss <- rootSelect "input#upload_strava"
-  scs <- rootSelect "input#connect_strava"
+  Tuple node _ <- runUIWith ui (\req elt driver -> do
+    case req of
+      Data _ -> return unit
+      CurrentState acts -> chart $ concat acts
+    )
+  appendToBody node
 
-  cb <- combinedCallback []
-
-  rs ... onChange cb
-  ss ... onChange cb
-  scs ... onClick' downloadStrava
-
-  HalogenStuff.main
-
-  return rs
+  return unit
 
 main = mainInteractive

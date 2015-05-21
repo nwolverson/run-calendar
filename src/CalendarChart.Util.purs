@@ -16,6 +16,13 @@ import DOM.File
 import Data.Either
 import Debug.Trace
 
+
+import Data.DOM.Simple.Element
+import Data.DOM.Simple.Types
+
+--import Control.Monad.Eff.Class(liftEff)
+import Control.Monad.Aff(makeAff,Aff())
+
 ffi = unsafeForeignFunction
 
 formatDate :: String -> JSDate -> String
@@ -56,6 +63,16 @@ getFile sel = do
     Right [ f ] -> Just $ unsafeFromForeign $ f
     _ -> Nothing
 
+elementFiles :: HTMLElement -> Foreign
+elementFiles = ffi ["element"] "element !== null ? Array.prototype.slice.call(element.files) : null"
+
+getElementFile :: HTMLElement -> Maybe File
+getElementFile sel = do
+  let files = elementFiles sel
+  case Data.Foreign.readArray files of
+    Right [ f ] -> Just $ unsafeFromForeign $ f
+    _ -> Nothing
+
 fileReader :: Unit -> FileReader
 fileReader = ffi [""] "new FileReader()"
 
@@ -73,6 +90,9 @@ readAsText = ffi ["fr", "file", "callback"]
   fr.readAsText(file);
   return {};
 }"""
+
+readAsTextAff :: FileReader -> Blob -> Aff _ String
+readAsTextAff fr file = makeAff (\error success -> readAsText fr file success)
 
 openWindow :: forall a. String -> String -> String -> Eff (d :: DOM | a) Unit
 openWindow = ffi ["url", "windowName", "features", ""] "window.open(url,windowName,features)"
