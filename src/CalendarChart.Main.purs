@@ -4,10 +4,6 @@ import Data.Maybe
 
 import Data.JSON
 
-import Graphics.D3.Base
-import Graphics.D3.Util
-import Graphics.D3.Selection
-
 import CalendarChart.Chart
 import CalendarChart.Activities
 import CalendarChart.Strava
@@ -20,17 +16,13 @@ import Data.Date
 import Data.Tuple
 
 import Control.Monad.Eff
-
 import Control.Monad.Eff.Class
-import qualified Browser.WebStorage as WS
-
-import Network.HTTP.Affjax
 import Control.Monad.Eff.Class(liftEff)
 import Control.Monad.Aff(launchAff,Aff())
+import Network.HTTP.Affjax
 
+import qualified Browser.WebStorage as WS
 
-
--- import Data.Void
 import Data.Either
 import Control.Bind
 import DOM
@@ -49,13 +41,8 @@ import qualified Halogen.HTML.Events.Monad as E
 import Control.Functor (($>))
 import Control.Plus (empty)
 
-chartMonths :: [ Activity ] -> D3Eff (Unit)
-chartMonths x = void $ monthCharts (buildMap x) 2014 2
 
-chartWeek :: Date -> [ Activity ] -> D3Eff (Unit)
-chartWeek date x = void $ chartDays (buildMap x) date 7
-
-fetchCont :: ([Activity] -> D3Eff (Unit)) -> Aff _ Unit
+fetchCont :: ([Activity] -> Eff _ (Unit)) -> Aff _ Unit
 fetchCont chartf = do
   strava <- get "data/activities.json"
   let vals = fromMaybe [] $ decode $ strava.response
@@ -76,14 +63,6 @@ mainWeek jsd =
 mainMonths = launchAff (fetchCont chartMonths)
 
 chart = chartMonths <<< filter (\(Activity a) -> a.type == Run)
-
-changeCallback :: Selection _ -> (String -> Eff _ _) -> _ -> Eff (trace :: Trace | _) Unit
-changeCallback rs cb i = do
-  let fr = fileReader unit
-  case getFile rs of
-    Nothing -> cb ""
-    Just f -> readAsText fr (fileAsBlob f) cb
-
 
 stravaTokenKey = "stravaToken"
 
@@ -161,7 +140,8 @@ ui = render <$> stateful (State []) update
 
     , H.p_ [ H.text $ "Files uploaded: " ++ show (length s) ]
 
-    , H.div [ A.classes [A.className "monthchart", A.className "hcl2"] ] []
+    , H.div [ A.classes [A.className "monthchart", A.className "hcl2"]
+    ] []
     ]
 
   update :: State -> Input -> State

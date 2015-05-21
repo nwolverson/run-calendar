@@ -185,3 +185,10 @@ monthCharts input year count = do
     .. selectAll "svg"
       .. bind (Arr.range year $ year+count-1)
   sel ... enter .. monthChart input
+
+
+chartMonths :: [ Activity ] -> D3Eff (Unit)
+chartMonths x = void $ monthCharts (buildMap x) 2014 2
+
+chartWeek :: Date -> [ Activity ] -> D3Eff (Unit)
+chartWeek date x = void $ chartDays (buildMap x) date 7
