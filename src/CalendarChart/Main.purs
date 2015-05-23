@@ -116,21 +116,18 @@ ui = render <$> stateful (State []) update
   render (State s) = H.div_
     [ H.text "Upload data (RunningAhead csv format): "
     , H.input [ A.type_ "file", A.onChange $ \e -> pure (do
-        text <- E.async $ case getElementFile e.target of
-          Nothing -> return ""
-          Just f -> readAsTextAff (fileReader unit) (fileAsBlob f)
+        text <- E.async $ getFile e
         liftEff $ trace "Got RA data"
         ra <- liftEff $ getRAfromText text
-        pure (Data ra) <> pure (CurrentState $ ra:s)
+        stateInput s ra
       ) ] []
+
     , H.text "Upload data (Strava saved JSON format): "
     , H.input [ A.type_ "file", A.onChange $ \e -> pure (do
-        text <- E.async $ case getElementFile e.target of
-          Nothing -> return ""
-          Just f -> readAsTextAff (fileReader unit) (fileAsBlob f)
+        text <- E.async $ getFile e
         liftEff $ trace "Got Strava data"
         let sa = getStravaFromText text
-        pure (Data sa) <> pure (CurrentState $ sa:s)
+        stateInput s sa
       ) ] []
 
     , H.button [ A.onClick $ \_ -> pure (do
@@ -140,16 +137,25 @@ ui = render <$> stateful (State []) update
 
     , H.p_ [ H.text $ "Files uploaded: " ++ show (length s) ]
 
-    , H.div [ A.classes [A.className "monthchart", A.className "hcl2"]
-    ] []
+    , H.div [ A.classes [A.className "monthchart", A.className "hcl2"] ] []
     ]
 
+  getFile e =
+    case getElementFile e.target of
+      Nothing -> return ""
+      Just f -> readAsTextAff (fileReader unit) (fileAsBlob f)
+
+  stateInput s i = pure (Data i) <> pure (CurrentState $ updateState s i)
+
+  updateState s a = a : s
+
   update :: State -> Input -> State
-  update (State s) (Data a) = State (a:s)
+  update (State s) (Data a) = State (updateState s a)
   update s _ = s
 
 mainInteractive = do
   Tuple node _ <- runUIWith ui (\req elt driver -> do
+    trace "runUi callback"
     case req of
       Data _ -> return unit
       CurrentState acts -> chart $ concat acts
