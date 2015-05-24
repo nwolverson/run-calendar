@@ -187,8 +187,8 @@ monthCharts input year count = do
   sel ... enter .. monthChart input
 
 
-chartMonths :: [ Activity ] -> D3Eff (Unit)
-chartMonths x = void $ monthCharts (buildMap x) 2014 2
+chartMonths :: Number -> [ Activity ] -> D3Eff (Unit)
+chartMonths y x = void $ monthCharts (buildMap x) (2015-y+1) y
 
 chartWeek :: Date -> [ Activity ] -> D3Eff (Unit)
 chartWeek date x = void $ chartDays (buildMap x) date 7

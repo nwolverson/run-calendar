@@ -10,7 +10,7 @@ import CalendarChart.Strava
 import CalendarChart.RA
 import CalendarChart.Util
 
-import Data.Array(map,mapMaybe,length,filter,concat)
+import Data.Array(map,mapMaybe,length,filter,concat,(..))
 import Debug.Trace
 import Data.Date
 import Data.Tuple
@@ -24,6 +24,7 @@ import Network.HTTP.Affjax
 import qualified Browser.WebStorage as WS
 
 import Data.Either
+import Data.Foreign(readString)
 import Control.Bind
 import DOM
 import Data.DOM.Simple.Document
@@ -36,6 +37,7 @@ import Halogen.Component
 import qualified Halogen.HTML as H
 import qualified Halogen.HTML.Attributes as A
 import qualified Halogen.HTML.Events as A
+import qualified Halogen.HTML.Events.Forms as A
 import qualified Halogen.HTML.Events.Handler as E
 import qualified Halogen.HTML.Events.Monad as E
 import Control.Functor (($>))
@@ -60,9 +62,9 @@ mainWeek jsd =
     dt :: Date
     dt = Data.Maybe.Unsafe.fromJust $ fromJSDate jsd
 
-mainMonths = launchAff (fetchCont chartMonths)
+mainMonths = launchAff (fetchCont (chartMonths 1))
 
-chart = chartMonths <<< filter (\(Activity a) -> a.type == Run)
+chart y = chartMonths y <<< filter (\(Activity a) -> a.type == Run)
 
 stravaTokenKey = "stravaToken"
 
@@ -104,22 +106,23 @@ appendToBody :: forall eff. HTMLElement -> Eff (dom :: DOM | eff) Unit
 appendToBody e = document globalWindow >>= (body >=> flip appendChild e)
 
 -- | The state of the application
-data State = State [[Activity]]
+data State = State { data:: [[Activity]], years:: Number }
 
 -- | Inputs to the state machine
-data Input = Data [Activity] | CurrentState [[Activity]]
+data StateInput = CurrentState State | Input Input
+data Input = Data [Activity] | Years Number
 
-ui :: Component (E.Event (HalogenEffects _)) Input Input
-ui = render <$> stateful (State []) update
+ui :: Component (E.Event (HalogenEffects _)) StateInput StateInput
+ui = render <$> stateful (State { data: [], years: 1 }) update
   where
-  render :: State -> H.HTML (E.Event (HalogenEffects _) Input)
-  render (State s) = H.div_
+  render :: State -> H.HTML (E.Event (HalogenEffects _) StateInput)
+  render s@(State { data = activities, years = years}) = H.div_
     [ H.text "Upload data (RunningAhead csv format): "
     , H.input [ A.type_ "file", A.onChange $ \e -> pure (do
         text <- E.async $ getFile e
         liftEff $ trace "Got RA data"
         ra <- liftEff $ getRAfromText text
-        stateInput s ra
+        stateInput s (Data ra)
       ) ] []
 
     , H.text "Upload data (Strava saved JSON format): "
@@ -127,7 +130,7 @@ ui = render <$> stateful (State []) update
         text <- E.async $ getFile e
         liftEff $ trace "Got Strava data"
         let sa = getStravaFromText text
-        stateInput s sa
+        stateInput s (Data sa)
       ) ] []
 
     , H.button [ A.onClick $ \_ -> pure (do
@@ -135,7 +138,19 @@ ui = render <$> stateful (State []) update
         empty
       ) ] [ H.text "Connect to Strava"]
 
-    , H.p_ [ H.text $ "Files uploaded: " ++ show (length s) ]
+
+    , H.text "Show years: "
+    , H.select [ A.onValueChanged $ \v -> pure $ do
+          let n = parseInt $ either (\_ -> "1") id $ readString v
+          stateInput s (Years n)
+        ]
+      ( (\y ->
+        H.option [ A.onSelect $ \e -> pure $ stateInput s (Years y) ] [H.text $ show y]
+      ) <$> 1..5 )
+
+    , H.p_ [ H.text $ "Files uploaded: " ++ show (length activities) ]
+
+    , H.p_ [ H.text $ "Years to show: " ++ show (years)]
 
     , H.div [ A.classes [A.className "monthchart", A.className "hcl2"] ] []
     ]
@@ -145,20 +160,25 @@ ui = render <$> stateful (State []) update
       Nothing -> return ""
       Just f -> readAsTextAff (fileReader unit) (fileAsBlob f)
 
-  stateInput s i = pure (Data i) <> pure (CurrentState $ updateState s i)
 
-  updateState s a = a : s
+  stateInput :: State -> Input -> _
+  stateInput s i = pure (Input i) <> pure (CurrentState $ updateState s i)
 
-  update :: State -> Input -> State
-  update (State s) (Data a) = State (updateState s a)
-  update s _ = s
+  updateState :: State -> Input -> State
+  updateState (State rec @ { data = s }) (Data a) = State rec { data = (a : s) }
+  updateState (State s) (Years n) = State $ s { years = n }
+
+
+  update :: State -> StateInput -> State
+  update s (Input i) = updateState s i
+  update s (CurrentState _) = s
 
 mainInteractive = do
   Tuple node _ <- runUIWith ui (\req elt driver -> do
     trace "runUi callback"
     case req of
-      Data _ -> return unit
-      CurrentState acts -> chart $ concat acts
+      CurrentState (State { data = acts, years = y }) -> chart y $ concat acts
+      _ -> return unit
     )
   appendToBody node
 
