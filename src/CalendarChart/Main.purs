@@ -144,9 +144,7 @@ ui = render <$> stateful (State { data: [], years: 1 }) update
           let n = parseInt $ either (\_ -> "1") id $ readString v
           stateInput s (Years n)
         ]
-      ( (\y ->
-        H.option [ A.onSelect $ \e -> pure $ stateInput s (Years y) ] [H.text $ show y]
-      ) <$> 1..5 )
+      ( (\y -> H.option_ [H.text $ show y]) <$> 1..5 )
 
     , H.p_ [ H.text $ "Files uploaded: " ++ show (length activities) ]
 
