@@ -25,7 +25,7 @@ http.createServer(function (req, res) {
 
       var data = JSON.parse(body);
 
-      var response = "<html><body><script>window.opener.PS.CalendarChart_Main.downloadedStrava('" + data.access_token + "')(); window.close()</script></body></html>"
+      var response = "<html><body><script>window.opener.downloadedStrava('" + data.access_token + "'); window.close()</script></body></html>"
 
       res.end(response);
 

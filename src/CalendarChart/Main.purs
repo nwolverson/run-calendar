@@ -68,39 +68,35 @@ chart y = chartMonths y <<< filter (\(Activity a) -> a.type == Run)
 
 stravaTokenKey = "stravaToken"
 
-downloadStrava :: _ -> Eff _ Unit
+downloadStrava :: forall e. Unit -> Aff (trace :: Trace | e) [Activity]
 downloadStrava _ = do
   let stravaUrl = "https://www.strava.com/oauth/authorize?client_id=2746&response_type=code&redirect_uri=http://localhost:8123/token_exchange&scope=public&state=mystate&approval_prompt=force"
-  cachedToken <- WS.getItem WS.localStorage stravaTokenKey
+  cachedToken <- liftEff $ WS.getItem WS.localStorage stravaTokenKey
+
   case cachedToken of
     Nothing -> do
-      openWindow stravaUrl "login" "height=600,width=800"
-      trace "Downloading Strava"
-    Just token -> do
-      trace "Got cached token"
+      liftEff $ trace "Downloading Strava"
+      let stravaUrl = "https://www.strava.com/oauth/authorize?client_id=2746&response_type=code&redirect_uri=http://localhost:8123/token_exchange&scope=public&state=mystate&approval_prompt=force"
+      liftEff $ openWindow stravaUrl "login" "height=600,width=800"
+      token <- externalCallAff "downloadedStrava"
+      liftEff $ trace $ "Got Strava token: " ++ token
       downloadedStrava token
-      trace "xxx"
+    Just token -> do
+      liftEff $ trace "Got cached token"
+      downloadedStrava token
 
--- called externally
-downloadedStrava :: String -> Eff _ Unit
+downloadedStrava :: forall e. String -> Aff (trace :: Trace | e) [Activity]
 downloadedStrava token = do
-  trace $ "Strava callback complete: " ++ token
-  WS.setItem WS.localStorage stravaTokenKey token
+  liftEff $ trace $ "Strava callback complete: " ++ token
+  liftEff $ WS.setItem WS.localStorage stravaTokenKey token
   fetchStrava 1 token
-  trace "42"
 
-fetchStrava :: Number -> String -> Eff _ Unit
+fetchStrava :: forall e. Number -> String -> Aff (trace :: Trace | e) [Activity]
 fetchStrava page token = do
-  trace "About to fetch strava data"
+  liftEff $ trace "About to fetch strava data"
   let url = "https://www.strava.com/api/v3/athlete/activities?per_page=200" ++ "&page=" ++ (show page) ++ "&access_token=" ++ token ++ "&callback={callback}"
-
-  jsonp url (\result -> do
-    trace "fetched strava data"
-    let stravaData = getStravaFromText result
-    -- cb <- combinedCallback stravaData
-    -- cb unit
-    return unit
-  )
+  text <- jsonpAff url
+  return $ getStravaFromText text
 
 appendToBody :: forall eff. HTMLElement -> Eff (dom :: DOM | eff) Unit
 appendToBody e = document globalWindow >>= (body >=> flip appendChild e)
@@ -134,8 +130,8 @@ ui = render <$> stateful (State { data: [], years: 1 }) update
       ) ] []
 
     , H.button [ A.onClick $ \_ -> pure (do
-        liftEff $ downloadStrava unit
-        empty
+        sa <- E.async $ downloadStrava unit
+        stateInput s (Data sa)
       ) ] [ H.text "Connect to Strava"]
 
 
