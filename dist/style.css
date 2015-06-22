@@ -62,3 +62,7 @@ body {
 .hcl2 .q9 {
   fill: #EAE865;
 }
+
+input[type="file"] {
+  display: none;
+}

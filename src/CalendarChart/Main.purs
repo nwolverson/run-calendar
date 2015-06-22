@@ -37,6 +37,7 @@ import Halogen.Component
 import qualified Halogen.HTML as H
 import qualified Halogen.HTML.Attributes as A
 import qualified Halogen.HTML.Events as A
+import qualified Halogen.HTML.Events.Types as ET
 import qualified Halogen.HTML.Events.Forms as A
 import qualified Halogen.HTML.Events.Handler as E
 import qualified Halogen.HTML.Events.Monad as E
@@ -113,21 +114,22 @@ ui = render <$> stateful (State { data: [], years: 1 }) update
   where
   render :: State -> H.HTML (E.Event (HalogenEffects _) StateInput)
   render s@(State { data = activities, years = years}) = H.div_
-    [ H.text "Upload data (RunningAhead csv format): "
-    , H.input [ A.type_ "file", A.onChange $ \e -> pure (do
+    [ H.input [ A.type_ "file", A.id_ "rafileinput", A.onChange $ \e -> pure (do
         text <- E.async $ getFile e
         liftEff $ trace "Got RA data"
         ra <- liftEff $ getRAfromText text
         stateInput s (Data ra)
       ) ] []
 
-    , H.text "Upload data (Strava saved JSON format): "
-    , H.input [ A.type_ "file", A.onChange $ \e -> pure (do
+    , H.input [ A.type_ "file", A.id_ "stravafileinput", A.onChange $ \e -> pure (do
         text <- E.async $ getFile e
         liftEff $ trace "Got Strava data"
         let sa = getStravaFromText text
         stateInput s (Data sa)
       ) ] []
+
+    , H.button [ A.onClick $ clickFileInput "#rafileinput" ] [ H.text "Upload RunningAhead"]
+    , H.button [ A.onClick $ clickFileInput "#stravafileinput" ] [ H.text "Upload Strava (Local JSON)"]
 
     , H.button [ A.onClick $ \_ -> pure (do
         sa <- E.async $ downloadStrava unit
@@ -149,6 +151,16 @@ ui = render <$> stateful (State { data: [], years: 1 }) update
     , H.div [ A.classes [A.className "monthchart", A.className "hcl2"] ] []
     ]
 
+  clickFileInput :: String -> ET.Event ET.MouseEvent -> E.EventHandler _
+  clickFileInput selector _ = pure $ do
+      (liftEff $ do
+          doc <- document globalWindow
+          fileInput <- querySelector "#stravafileinput" doc
+          case fileInput of
+            Just i -> click i
+            Nothing -> return unit)
+      empty
+
   getFile e =
     case getElementFile e.target of
       Nothing -> return ""
@@ -161,11 +173,13 @@ ui = render <$> stateful (State { data: [], years: 1 }) update
   updateState :: State -> Input -> State
   updateState (State rec @ { data = s }) (Data a) = State rec { data = (a : s) }
   updateState (State s) (Years n) = State $ s { years = n }
+  updateState (ss) _ = ss
 
 
   update :: State -> StateInput -> State
   update s (Input i) = updateState s i
   update s (CurrentState _) = s
+
 
 mainInteractive = do
   Tuple node _ <- runUIWith ui (\req elt driver -> do
