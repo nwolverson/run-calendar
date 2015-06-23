@@ -14,6 +14,7 @@ import Data.Array(map,mapMaybe,length,filter,concat,(..))
 import Debug.Trace
 import Data.Date
 import Data.Tuple
+import Data.Foldable(for_)
 
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
@@ -102,8 +103,20 @@ fetchStrava page token = do
 appendToBody :: forall eff. HTMLElement -> Eff (dom :: DOM | eff) Unit
 appendToBody e = document globalWindow >>= (body >=> flip appendChild e)
 
+dataActivities :: forall i. String -> A.Attr i
+dataActivities = A.attr $ A.attributeName "data-activities"
+
 -- | The state of the application
 data State = State { data:: [[Activity]], years:: Number }
+
+instance stateToJSON :: ToJSON State where
+  toJSON (State { data = d, years = y }) = object [ "data" .= d, "years" .= y ]
+
+instance stateFromJSON :: FromJSON State where
+  parseJSON (JObject o) = do
+    d <- o .: "data"
+    y <- o .: "years"
+    return $ State { data: d, years: y }
 
 -- | Inputs to the state machine
 data StateInput = CurrentState State | Input Input
@@ -148,14 +161,14 @@ ui = render <$> stateful (State { data: [], years: 1 }) update
 
     , H.p_ [ H.text $ "Years to show: " ++ show (years)]
 
-    , H.div [ A.classes [A.className "monthchart", A.className "hcl2"] ] []
+    , H.div [ dataActivities $ encode s, A.classes [A.className "monthchart", A.className "hcl2"] ] []
     ]
 
   clickFileInput :: String -> ET.Event ET.MouseEvent -> E.EventHandler _
   clickFileInput selector _ = pure $ do
       (liftEff $ do
           doc <- document globalWindow
-          fileInput <- querySelector "#stravafileinput" doc
+          fileInput <- querySelector selector doc
           case fileInput of
             Just i -> click i
             Nothing -> return unit)
@@ -182,12 +195,31 @@ ui = render <$> stateful (State { data: [], years: 1 }) update
 
 
 mainInteractive = do
-  Tuple node _ <- runUIWith ui (\req elt driver -> do
-    trace "runUi callback"
-    case req of
-      CurrentState (State { data = acts, years = y }) -> chart y $ concat acts
-      _ -> return unit
-    )
+  Tuple node _ <- runUIWith ui \req elt driver -> do
+      divElts <- querySelector ".monthchart" elt
+      trace "runui callback"
+      for_ divElts \divElt -> do
+        trace "got chart elt"
+        dat <- getAttribute "data-activities" $ divElt
+        trace $ "data: " ++ dat
+        case decode dat of
+          Just (State { data = acts, years = y}) -> do
+            trace $ "acts: " ++ (show (length acts))
+            chart y $ concat acts
+          Nothing -> trace "No data?!"
+
+  -- (\req elt driver -> do
+  --   div <- querySelector "#monthChart"
+  --   dat <- getAttribute "data-activities" div
+  --   let acts = fromMaybe [] $ ((decode dat :: Maybe [[Activity]]))
+  --   -- get year
+  --   trace "runUi callback"
+  --   return unit)
+  --   --chart 5 $ concat acts
+  --   -- case req of
+  --   --   CurrentState (State { data = acts, years = y }) -> chart y $ concat acts
+  --   --   _ -> return unit
+
   appendToBody node
 
   return unit

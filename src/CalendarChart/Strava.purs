@@ -6,14 +6,9 @@ import Data.Date(Date(),fromString)
 import Data.Maybe
 import Data.JSON
 
-instance dateFromJSON :: FromJSON Date where
-  parseJSON (JString ds) =
-    case fromString ds of
-      Just d -> return d
-      Nothing -> fail "Not date"
-  parseJSON _ = fail "Not string"
+data StravaActivity = StravaActivity Activity
 
-instance activityFromJSON :: FromJSON Activity where
+instance activityFromJSON :: FromJSON StravaActivity where
   parseJSON (JObject o) = do
     startDate <- o .: "start_date"
     dist <- o .: "distance"
@@ -22,8 +17,13 @@ instance activityFromJSON :: FromJSON Activity where
           "Run" -> Run
           "Ride" -> Bike
           x -> Other x
-    return $ Activity { date: startDate, distance: dist, type: cType }
+    return $ StravaActivity $ Activity { date: startDate, distance: dist, type: cType }
   parseJSON _ = fail "activity parse failed"
 
 getStravaFromText :: String -> [Activity]
-getStravaFromText = fromMaybe [] <<< decode
+getStravaFromText t =
+  case decode t of
+    Just stravaActs -> getAct <$> stravaActs
+    Nothing -> []
+  where
+    getAct (StravaActivity a) = a

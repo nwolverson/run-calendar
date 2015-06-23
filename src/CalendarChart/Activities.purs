@@ -10,6 +10,8 @@ import Data.Maybe
 import qualified Data.Array as Arr
 import Data.Foldable(foldlArray)
 
+import Data.JSON
+
 import CalendarChart.Util
 
 data Type = Run | Bike | Other String
@@ -24,9 +26,39 @@ instance typeEq :: Eq Type where
 type ActivityR = { date :: Date, distance :: Number, type :: Type }
 data Activity = Activity ActivityR
 
-
 instance showActivity :: Show Activity where
   show (Activity { date = d, distance = n, type = t }) = show d ++ ": " ++ show n
+
+instance activityToJSON :: ToJSON Activity where
+  toJSON (Activity { date = dt, distance = dist, type = t }) =
+    object [ "date" .= dt, "dist" .= dist, "ty" .= t ]
+
+instance activityFromJSON :: FromJSON Activity where
+  parseJSON (JObject o) = do
+    date <- o .: "date"
+    dist <- o .: "dist"
+    ty <- o .: "ty"
+    return $ Activity { date: date, distance: dist, type: ty }
+
+instance typeToJSON :: ToJSON Type where
+  toJSON Run = JString "run"
+  toJSON Bike = JString "bike"
+  toJSON (Other x) = JString x
+
+instance typeFromJSON :: FromJSON Type where
+  parseJSON (JString "run") = pure Run
+  parseJSON (JString "bike") = pure Bike
+  parseJSON (JString x) = pure $ Other x
+
+instance dateToJSON :: ToJSON Date where
+  toJSON date = JString $ isoDateFormat $ toJSDate date
+
+instance dateFromJSON :: FromJSON Date where
+  parseJSON (JString ds) =
+    case fromString ds of
+      Just d -> return d
+      Nothing -> fail "Not date"
+  parseJSON _ = fail "Not string"
 
 dayOf d = date (year d) (month d) (dayOfMonth d)
 actToTuple (Activity { date: d, distance: n }) = Tuple d n
@@ -67,4 +99,5 @@ addDays d n =
 
 weekFormat = formatDate "%W"
 fullDateFormat = formatDate "%Y-%m-%d"
+isoDateFormat = formatDate "%Y-%m-%dT%H:%M:%SZ"
 week d = parseInt $ weekFormat $ toJSDate d
