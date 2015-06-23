@@ -106,7 +106,6 @@ appendToBody e = document globalWindow >>= (body >=> flip appendChild e)
 dataActivities :: forall i. String -> A.Attr i
 dataActivities = A.attr $ A.attributeName "data-activities"
 
--- | The state of the application
 data State = State { data:: [[Activity]], years:: Number }
 
 instance stateToJSON :: ToJSON State where
@@ -118,51 +117,51 @@ instance stateFromJSON :: FromJSON State where
     y <- o .: "years"
     return $ State { data: d, years: y }
 
--- | Inputs to the state machine
-data StateInput = CurrentState State | Input Input
 data Input = Data [Activity] | Years Number
 
-ui :: Component (E.Event (HalogenEffects _)) StateInput StateInput
-ui = render <$> stateful (State { data: [], years: 1 }) update
+ui :: Component (E.Event (HalogenEffects _)) Input Input
+ui = render <$> stateful (State { data: [], years: 1 }) updateState
   where
-  render :: State -> H.HTML (E.Event (HalogenEffects _) StateInput)
+  render :: State -> H.HTML (E.Event (HalogenEffects _) Input)
   render s@(State { data = activities, years = years}) = H.div_
     [ H.input [ A.type_ "file", A.id_ "rafileinput", A.onChange $ \e -> pure (do
         text <- E.async $ getFile e
         liftEff $ trace "Got RA data"
         ra <- liftEff $ getRAfromText text
-        stateInput s (Data ra)
+        return $ Data ra
       ) ] []
 
     , H.input [ A.type_ "file", A.id_ "stravafileinput", A.onChange $ \e -> pure (do
         text <- E.async $ getFile e
         liftEff $ trace "Got Strava data"
         let sa = getStravaFromText text
-        stateInput s (Data sa)
+        return $ Data sa
       ) ] []
 
-    , H.button [ A.onClick $ clickFileInput "#rafileinput" ] [ H.text "Upload RunningAhead"]
-    , H.button [ A.onClick $ clickFileInput "#stravafileinput" ] [ H.text "Upload Strava (Local JSON)"]
-
-    , H.button [ A.onClick $ \_ -> pure (do
-        sa <- E.async $ downloadStrava unit
-        stateInput s (Data sa)
-      ) ] [ H.text "Connect to Strava"]
-
-
-    , H.text "Show years: "
-    , H.select [ A.onValueChanged $ \v -> pure $ do
-          let n = parseInt $ either (\_ -> "1") id $ readString v
-          stateInput s (Years n)
-        ]
-      ( (\y -> H.option_ [H.text $ show y]) <$> 1..5 )
-
-    , H.p_ [ H.text $ "Files uploaded: " ++ show (length activities) ]
-
-    , H.p_ [ H.text $ "Years to show: " ++ show (years)]
+    , H.div [ A.classes [ A.className "header" ] ] [
+          H.span [ A.classes [A.className "title"] ] [ H.text "Run Calendar" ]
+        , H.span [ A.onClick $ clickFileInput "#rafileinput" ] [ H.text "RA" ]
+        , H.span [ A.onClick $ clickFileInput "#stravafileinput", A.classes [A.className "strava"] ] [ H.img [ A.src "strava.svg"] [],  H.text "Strava/local" ]
+        , H.span [ A.classes [A.className "strava"], A.onClick $ \_ -> pure (do
+              sa <- E.async $ downloadStrava unit
+              return $ Data sa) ]
+          [
+            H.img [ A.src "strava.svg" ] []
+          , H.text "Connect to Strava"
+          ]
+        , H.text "Years:"
+        , H.span_ (yearLink years <$> 1..5 )
+        , H.text $ "Data Sources: " ++  show (length activities)
+      ]
 
     , H.div [ dataActivities $ encode s, A.classes [A.className "monthchart", A.className "hcl2"] ] []
     ]
+
+  yearLink years y =
+    if y == years then
+      H.span [ A.classes [ A.className "year", A.className "selected" ] ] [ H.text $ show y ]
+    else
+      H.span [ A.onClick $ A.input_ $ Years y, A.classes [ A.className "year" ] ] [ H.text $ show y ]
 
   clickFileInput :: String -> ET.Event ET.MouseEvent -> E.EventHandler _
   clickFileInput selector _ = pure $ do
@@ -179,46 +178,21 @@ ui = render <$> stateful (State { data: [], years: 1 }) update
       Nothing -> return ""
       Just f -> readAsTextAff (fileReader unit) (fileAsBlob f)
 
-
-  stateInput :: State -> Input -> _
-  stateInput s i = pure (Input i) <> pure (CurrentState $ updateState s i)
-
   updateState :: State -> Input -> State
   updateState (State rec @ { data = s }) (Data a) = State rec { data = (a : s) }
   updateState (State s) (Years n) = State $ s { years = n }
   updateState (ss) _ = ss
 
 
-  update :: State -> StateInput -> State
-  update s (Input i) = updateState s i
-  update s (CurrentState _) = s
-
-
 mainInteractive = do
   Tuple node _ <- runUIWith ui \req elt driver -> do
       divElts <- querySelector ".monthchart" elt
-      trace "runui callback"
       for_ divElts \divElt -> do
-        trace "got chart elt"
         dat <- getAttribute "data-activities" $ divElt
-        trace $ "data: " ++ dat
         case decode dat of
           Just (State { data = acts, years = y}) -> do
-            trace $ "acts: " ++ (show (length acts))
             chart y $ concat acts
           Nothing -> trace "No data?!"
-
-  -- (\req elt driver -> do
-  --   div <- querySelector "#monthChart"
-  --   dat <- getAttribute "data-activities" div
-  --   let acts = fromMaybe [] $ ((decode dat :: Maybe [[Activity]]))
-  --   -- get year
-  --   trace "runUi callback"
-  --   return unit)
-  --   --chart 5 $ concat acts
-  --   -- case req of
-  --   --   CurrentState (State { data = acts, years = y }) -> chart y $ concat acts
-  --   --   _ -> return unit
 
   appendToBody node
 

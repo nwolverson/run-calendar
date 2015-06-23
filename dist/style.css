@@ -10,6 +10,7 @@
 body {
   font: 10px sans-serif;
   shape-rendering: crispEdges;
+  margin: 0;
 }
 
 .day {
@@ -65,4 +66,31 @@ body {
 
 input[type="file"] {
   display: none;
+}
+
+.header {
+  background: lightblue;
+  color: gray;
+  font-size: 16px;
+}
+
+.title {
+  color: white;
+  font-size: 26px;
+}
+.header img {
+  height: 25px;
+}
+.header span {
+  margin: 0px 10px;
+}
+.header span .year {
+  margin: 0px 2px;
+}
+.header span .year.selected {
+  color: white;
+}
+.header .strava {
+  color: #FC4C01;
+  cursor: pointer;
 }
