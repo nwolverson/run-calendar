@@ -28,6 +28,9 @@ ffi = unsafeForeignFunction
 formatDate :: String -> JSDate -> String
 formatDate = unsafeForeignFunction ["fmt"] "d3.time.format(fmt)"
 
+dateToISOString :: JSDate -> String
+dateToISOString = ffi ["d"] "d.toISOString()"
+
 format :: String -> Number -> String
 format = ffi ["fmt"] "d3.format(fmt)"
 

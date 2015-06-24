@@ -13,6 +13,7 @@ import CalendarChart.Util
 import Data.Array(map,mapMaybe,length,filter,concat,(..))
 import Debug.Trace
 import Data.Date
+import Data.Time
 import Data.Tuple
 import Data.Foldable(for_)
 
@@ -69,6 +70,7 @@ mainMonths = launchAff (fetchCont (chartMonths 1))
 chart y = chartMonths y <<< filter (\(Activity a) -> a.type == Run)
 
 stravaTokenKey = "stravaToken"
+savedStateKey = "savedState"
 
 downloadStrava :: forall e. Unit -> Aff (trace :: Trace | e) [Activity]
 downloadStrava _ = do
@@ -106,21 +108,26 @@ appendToBody e = document globalWindow >>= (body >=> flip appendChild e)
 dataActivities :: forall i. String -> A.Attr i
 dataActivities = A.attr $ A.attributeName "data-activities"
 
-data State = State { data:: [[Activity]], years:: Number }
+data State = State { data:: [[Activity]], years:: Number, lastPull:: Maybe Date }
+
+defaultState :: State
+defaultState = State { data: [], years: 1, lastPull: Nothing }
 
 instance stateToJSON :: ToJSON State where
-  toJSON (State { data = d, years = y }) = object [ "data" .= d, "years" .= y ]
+  toJSON (State { data = d, years = y, lastPull = lastPull }) =
+    object [ "data" .= d, "years" .= y, "lastPull" .= lastPull ]
 
 instance stateFromJSON :: FromJSON State where
   parseJSON (JObject o) = do
     d <- o .: "data"
     y <- o .: "years"
-    return $ State { data: d, years: y }
+    lp <- o .: "lastPull"
+    return $ State { data: d, years: y, lastPull : lp }
 
-data Input = Data [Activity] | Years Number
+data Input = Data [Activity] | Years Number | DownloadData [Activity] Date
 
-ui :: Component (E.Event (HalogenEffects _)) Input Input
-ui = render <$> stateful (State { data: [], years: 1 }) updateState
+ui :: State -> Component (E.Event (HalogenEffects _)) Input Input
+ui initialState = render <$> stateful initialState updateState
   where
   render :: State -> H.HTML (E.Event (HalogenEffects _) Input)
   render s@(State { data = activities, years = years}) = H.div_
@@ -144,7 +151,8 @@ ui = render <$> stateful (State { data: [], years: 1 }) updateState
         , H.span [ A.onClick $ clickFileInput "#stravafileinput", A.classes [A.className "strava"] ] [ H.img [ A.src "strava.svg"] [],  H.text "Strava/local" ]
         , H.span [ A.classes [A.className "strava"], A.onClick $ \_ -> pure (do
               sa <- E.async $ downloadStrava unit
-              return $ Data sa) ]
+              d <- liftEff $ now
+              return $ DownloadData sa d) ]
           [
             H.img [ A.src "strava.svg" ] []
           , H.text "Connect to Strava"
@@ -180,22 +188,50 @@ ui = render <$> stateful (State { data: [], years: 1 }) updateState
 
   updateState :: State -> Input -> State
   updateState (State rec @ { data = s }) (Data a) = State rec { data = (a : s) }
+  updateState (State rec @ { data = s }) (DownloadData a d) = State rec { data = (a : s), lastPull = Just d }
   updateState (State s) (Years n) = State $ s { years = n }
   updateState (ss) _ = ss
 
+updateChart :: HTMLElement -> Eff (HalogenEffects (d3 :: Graphics.D3.Base.D3, feff :: CalendarChart.Util.FileEffect)) Unit
+updateChart elt = do
+  divElts <- querySelector ".monthchart" elt
+  for_ divElts \divElt -> do
+    dat <- getAttribute "data-activities" $ divElt
+    liftEff $ WS.setItem WS.localStorage savedStateKey dat
+    case decode dat of
+      Just (State { data = acts, years = y}) -> do
+        chart y $ concat acts
+      Nothing -> trace "No data?!"
 
-mainInteractive = do
-  Tuple node _ <- runUIWith ui \req elt driver -> do
-      divElts <- querySelector ".monthchart" elt
-      for_ divElts \divElt -> do
-        dat <- getAttribute "data-activities" $ divElt
-        case decode dat of
-          Just (State { data = acts, years = y}) -> do
-            chart y $ concat acts
-          Nothing -> trace "No data?!"
+isOld :: Maybe Date -> Date -> Boolean
+isOld Nothing _ = true
+isOld (Just old) current =
+  diff > Hours 1
+  where
+    t1 = toEpochMilliseconds old
+    t2 = toEpochMilliseconds current
+    diff = toHours $ t2 - t1
 
-  appendToBody node
+  --old < current
+
+mainInteractive :: Aff (HalogenEffects (d3 :: Graphics.D3.Base.D3, feff :: CalendarChart.Util.FileEffect)) Unit
+mainInteractive =  do
+  cachedToken <- liftEff $ WS.getItem WS.localStorage stravaTokenKey
+  savedState <- liftEff $ WS.getItem WS.localStorage savedStateKey
+
+  let initialState = fromMaybe defaultState $ savedState >>= decode
+  current <- liftEff now
+  state <- case initialState of
+    State (s@{ lastPull: lp }) | isOld lp current -> do
+      recentActs <- maybe (pure []) downloadedStrava cachedToken
+      return $ State $ s { lastPull = Just current, data = recentActs : s.data }
+    _ -> return initialState
+
+
+  Tuple node _ <- liftEff $ runUIWith (ui state) \req elt driver -> updateChart elt
+  liftEff $ appendToBody node
+  liftEff $ updateChart node
 
   return unit
 
-main = mainInteractive
+main = launchAff $ mainInteractive

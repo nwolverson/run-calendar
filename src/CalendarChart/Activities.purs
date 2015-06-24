@@ -51,7 +51,7 @@ instance typeFromJSON :: FromJSON Type where
   parseJSON (JString x) = pure $ Other x
 
 instance dateToJSON :: ToJSON Date where
-  toJSON date = JString $ isoDateFormat $ toJSDate date
+  toJSON date = JString $ dateToISOString $ toJSDate date
 
 instance dateFromJSON :: FromJSON Date where
   parseJSON (JString ds) =
