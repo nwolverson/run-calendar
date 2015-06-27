@@ -108,10 +108,41 @@ appendToBody e = document globalWindow >>= (body >=> flip appendChild e)
 dataActivities :: forall i. String -> A.Attr i
 dataActivities = A.attr $ A.attributeName "data-activities"
 
-data State = State { data:: [[Activity]], years:: Number, lastPull:: Maybe Date }
+data ActivityDetail = RunningAhead | StravaFile | StravaLink
+data Activities = Activities ActivityDetail [Activity]
+
+data State = State { data:: [Activities], years:: Number, lastPull:: Maybe Date }
 
 defaultState :: State
 defaultState = State { data: [], years: 1, lastPull: Nothing }
+
+instance activityDetailEq :: Eq ActivityDetail where
+  (==) RunningAhead RunningAhead = true
+  (==) StravaFile StravaFile = true
+  (==) StravaLink StravaLink = true
+  (==) _ _ = false
+  (/=) a b = not (a == b)
+
+
+instance activityDetailToJSON :: ToJSON ActivityDetail where
+  toJSON RunningAhead = JString "ra"
+  toJSON StravaFile = JString "stravafile"
+  toJSON StravaLink = JString "strava"
+
+instance activityDetailFromJSON :: FromJSON ActivityDetail where
+  parseJSON (JString "ra") = pure RunningAhead
+  parseJSON (JString "stravafile") = pure StravaFile
+  parseJSON (JString "strava") = pure StravaLink
+
+
+instance activitiesToJSON :: ToJSON Activities where
+  toJSON (Activities detail acts) = object [ "detail" .= detail, "acts" .= acts ]
+
+instance activitiesFromJSON :: FromJSON Activities where
+  parseJSON (JObject o) = do
+    detail <- o .: "detail"
+    acts <- o .: "acts"
+    return $ Activities detail acts
 
 instance stateToJSON :: ToJSON State where
   toJSON (State { data = d, years = y, lastPull = lastPull }) =
@@ -124,7 +155,7 @@ instance stateFromJSON :: FromJSON State where
     lp <- o .: "lastPull"
     return $ State { data: d, years: y, lastPull : lp }
 
-data Input = Data [Activity] | Years Number | DownloadData [Activity] Date
+data Input = RaData [Activity] | StravaFileData [Activity] | Years Number | StravaDownloadData [Activity] Date
 
 ui :: State -> Component (E.Event (HalogenEffects _)) Input Input
 ui initialState = render <$> stateful initialState updateState
@@ -135,14 +166,14 @@ ui initialState = render <$> stateful initialState updateState
         text <- E.async $ getFile e
         liftEff $ trace "Got RA data"
         ra <- liftEff $ getRAfromText text
-        return $ Data ra
+        return $ RaData ra
       ) ] []
 
     , H.input [ A.type_ "file", A.id_ "stravafileinput", A.onChange $ \e -> pure (do
         text <- E.async $ getFile e
         liftEff $ trace "Got Strava data"
         let sa = getStravaFromText text
-        return $ Data sa
+        return $ StravaFileData sa
       ) ] []
 
     , H.div [ A.classes [ A.className "header" ] ] [
@@ -152,7 +183,7 @@ ui initialState = render <$> stateful initialState updateState
         , H.span [ A.classes [A.className "strava"], A.onClick $ \_ -> pure (do
               sa <- E.async $ downloadStrava unit
               d <- liftEff $ now
-              return $ DownloadData sa d) ]
+              return $ StravaDownloadData sa d) ]
           [
             H.img [ A.src "strava.svg" ] []
           , H.text "Connect to Strava"
@@ -187,10 +218,25 @@ ui initialState = render <$> stateful initialState updateState
       Just f -> readAsTextAff (fileReader unit) (fileAsBlob f)
 
   updateState :: State -> Input -> State
-  updateState (State rec @ { data = s }) (Data a) = State rec { data = (a : s) }
-  updateState (State rec @ { data = s }) (DownloadData a d) = State rec { data = (a : s), lastPull = Just d }
+  updateState (State rec @ { data = s }) (RaData a) =
+    State rec { data = mergeActs (Activities RunningAhead a) s }
+  updateState (State rec @ { data = s }) (StravaFileData a) =
+    State rec { data = mergeActs (Activities StravaFile a) s }
+  updateState (State rec @ { data = s }) (StravaDownloadData a d) =
+    State rec { data = mergeActs (Activities StravaLink a) s, lastPull = Just d }
   updateState (State s) (Years n) = State $ s { years = n }
   updateState (ss) _ = ss
+
+mergeActs :: Activities -> [Activities] -> [Activities]
+mergeActs act [] = [act]
+mergeActs (Activities d acts) (Activities d' acts' : rest) | d == d' = Activities d (acts++acts') : rest
+mergeActs x (a : rest) = a : mergeActs x rest
+
+allActivities :: [Activities] -> [Activity]
+allActivities acts =
+  concat $ toActivities <$> acts
+  where
+    toActivities (Activities _ acts) = acts
 
 updateChart :: HTMLElement -> Eff (HalogenEffects (d3 :: Graphics.D3.Base.D3, feff :: CalendarChart.Util.FileEffect)) Unit
 updateChart elt = do
@@ -200,7 +246,7 @@ updateChart elt = do
     liftEff $ WS.setItem WS.localStorage savedStateKey dat
     case decode dat of
       Just (State { data = acts, years = y}) -> do
-        chart y $ concat acts
+        chart y $ allActivities acts
       Nothing -> trace "No data?!"
 
 isOld :: Maybe Date -> Date -> Boolean
@@ -212,7 +258,6 @@ isOld (Just old) current =
     t2 = toEpochMilliseconds current
     diff = toHours $ t2 - t1
 
-  --old < current
 
 mainInteractive :: Aff (HalogenEffects (d3 :: Graphics.D3.Base.D3, feff :: CalendarChart.Util.FileEffect)) Unit
 mainInteractive =  do
@@ -224,7 +269,7 @@ mainInteractive =  do
   state <- case initialState of
     State (s@{ lastPull: lp }) | isOld lp current -> do
       recentActs <- maybe (pure []) downloadedStrava cachedToken
-      return $ State $ s { lastPull = Just current, data = recentActs : s.data }
+      return $ State $ s { lastPull = Just current, data = Activities StravaLink recentActs : s.data }
     _ -> return initialState
 
 
