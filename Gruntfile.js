@@ -37,6 +37,10 @@ module.exports = function(grunt) {
         dest: 'tmp/main.js'
       },
       {
+        src: ['src/chart.js'],
+        dest: 'tmp/chart.js'
+      },
+      {
         expand: true,
         cwd: "build",
         src: ["**"],
@@ -48,6 +52,10 @@ module.exports = function(grunt) {
       all: {
         src: ["tmp/main.js"],
         dest: "dist/js/Main.js"
+      },
+      main: {
+        src: ["tmp/chart.js"],
+        dest: "dist/js/Chart.js"
       }
     },
     watch: {

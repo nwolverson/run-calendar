@@ -3,9 +3,9 @@ page.viewportSize = { width: 1018 , height: 140 };
 
 var system = require("system");
 
-page.open("http://localhost:8000", function(status) {
+page.open("http://localhost:8123/index.html", function(status) {
     page.evaluate(function() {
-      PS.CalendarChart_Main.mainMonths();
+      CalendarChart.mainMonths();
     });
 });
 

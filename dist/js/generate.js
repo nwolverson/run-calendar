@@ -13,9 +13,9 @@ if (args.length < 2)
 var date = args[1];
 console.log("Generating for week: "+ date);
 
-page.open("http://localhost:8000", function(status) {
+page.open("http://localhost:8123/index.html", function(status) {
     page.evaluate(function(date) {
-      PS.CalendarChart_Main.mainWeek(new Date(date))();
+      CalendarChart.mainWeek(new Date(date))();
     }, date);
 });
 
