@@ -40,6 +40,11 @@ instance activityFromJSON :: FromJSON Activity where
     ty <- o .: "ty"
     return $ Activity { date: date, distance: dist, type: ty }
 
+instance activityEq :: Eq Activity where
+  (==) (Activity {date: d, distance: dist, type: t}) (Activity {date: d', distance: dist', type: t'}) =
+    d == d' && dist == dist' && t == t'
+  (/=) a b = not (a == b)
+
 instance typeToJSON :: ToJSON Type where
   toJSON Run = JString "run"
   toJSON Bike = JString "bike"

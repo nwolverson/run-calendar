@@ -123,6 +123,10 @@ instance activityDetailEq :: Eq ActivityDetail where
   (==) _ _ = false
   (/=) a b = not (a == b)
 
+instance activitiesEq :: Eq Activities where
+  (==) (Activities d acts) (Activities d' acts') = d == d' && acts == acts'
+  (/=) a b = not (a == b)
+
 
 instance activityDetailToJSON :: ToJSON ActivityDetail where
   toJSON RunningAhead = JString "ra"
@@ -269,7 +273,7 @@ mainInteractive =  do
   state <- case initialState of
     State (s@{ lastPull: lp }) | isOld lp current -> do
       recentActs <- maybe (pure []) downloadedStrava cachedToken
-      return $ State $ s { lastPull = Just current, data = Activities StravaLink recentActs : s.data }
+      return $ State $ s { lastPull = Just current, data = mergeActs (Activities StravaLink recentActs) s.data }
     _ -> return initialState
 
 

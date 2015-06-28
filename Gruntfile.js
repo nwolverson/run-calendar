@@ -28,7 +28,7 @@ module.exports = function(grunt) {
     },
 
     dotPsci: {
-      src: ["src/**/*.purs", "bower_components/**/src/**/*.purs"]
+      src: ["<%=srcFiles%>"]
     },
 
      copy: [
@@ -39,6 +39,10 @@ module.exports = function(grunt) {
       {
         src: ['src/chart.js'],
         dest: 'tmp/chart.js'
+      },
+      {
+        src: ['src/test.js'],
+        dest: 'tmp/test.js'
       },
       {
         expand: true,
@@ -56,6 +60,10 @@ module.exports = function(grunt) {
       main: {
         src: ["tmp/chart.js"],
         dest: "dist/js/Chart.js"
+      },
+      test: {
+        src: ["tmp/test.js"],
+        dest: "dist/js/Test.js"
       }
     },
     watch: {
