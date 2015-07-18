@@ -102,8 +102,8 @@ dayval k input =
   in res / 1000.0
 
 addDays d n =
-  let milsPerDay = 1000 * 60 * 60 * 24
-      addDay (Milliseconds ms) = Milliseconds (ms + (milsPerDay * n))
+  let milsPerDay = 1000.0 * 60.0 * 60.0 * 24.0
+      addDay (Milliseconds ms) = Milliseconds (ms + (milsPerDay * I.toNumber n))
   in fromEpochMilliseconds <$> addDay $ toEpochMilliseconds d
 
 weekFormat = formatDate "%W"
