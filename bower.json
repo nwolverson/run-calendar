@@ -1,5 +1,5 @@
 {
-  "name": "Test",
+  "name": "run-calendar",
   "version": "0.0.0",
   "authors": [
     "Nicholas Wolverson <nicholas.wolverson@gmail.com>"
@@ -22,7 +22,7 @@
     "purescript-maps": "~0.4.0",
     "purescript-transformers": "~0.6.1",
     "purescript-foldable-traversable": "~0.4.0",
-    "purescript-json": "~0.4.7",
+    "purescript-json": "~0.5.0",
     "purescript-dom": "~0.1.2",
     "purescript-webstorage": "git@github.com:flipstone/purescript-webstorage.git#0.7_update",
     "purescript-affjax": "~0.4.0",
@@ -36,7 +36,7 @@
     "purescript-foreign": "^0.5.0",
     "purescript-maps": "^0.4.0",
     "purescript-foldable-traversable": "~0.4.0",
-    "purescript-tuples": "~0.3.0",
+    "purescript-tuples": "~0.4.0",
     "purescript-aff": "^0.11.0",
     "purescript-integers": "~0.1.0",
     "purescript-datetime": "master",
@@ -62,7 +62,8 @@
     "purescript-simple-dom": "6358414013eb3106d695e3e19488609f82d903e9",
     "purescript-profunctor": "^0.3.0",
     "purescript-void": "0.7-update",
-    "purescript-lists": "^0.7.0"
+    "purescript-lists": "^0.7.0",
+    "purescript-json": "~0.5.0"
   },
   "devDependencies": {
     "purescript-test-unit": "~2.0.0"
