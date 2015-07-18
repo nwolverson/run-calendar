@@ -13,7 +13,7 @@ ffi = unsafeForeignFunction
 files :: Node -> Maybe FileList
 files = ffi ["node"] "node.files" -- noooo
 
-filesArray :: FileList -> [File]
+filesArray :: FileList -> Array File
 filesArray = ffi ["fileList"] "fileList"
 
 name :: File -> String

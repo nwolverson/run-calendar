@@ -1,7 +1,9 @@
 module CalendarChart.Chart where
 
+import Prelude hiding (append)
+
 import Graphics.D3.Base
-import Graphics.D3.Util
+import Graphics.D3.Util hiding (min,max)
 import Graphics.D3.Selection
 import Graphics.D3.Scale
 import Graphics.D3.Request
@@ -12,9 +14,11 @@ import Data.Date.UTC
 import Data.Enum
 import Data.Map
 import Data.Maybe
-import Data.Tuple
-import Data.Int(fromNumber)
+import Data.Tuple hiding (lookup)
+import Data.Int(fromNumber,toNumber)
 import qualified Data.Array as Arr
+import Math
+import Data.List(filter)
 
 import CalendarChart.Util
 import CalendarChart.Activities
@@ -36,26 +40,26 @@ dayRange start count = Arr.mapMaybe dayOf range
   where
     range = Arr.mapMaybe (addDays start) $ Arr.range 0 (count-1)
 
-chartDays :: Map Date Number -> Date -> Number -> D3Eff (Selection Date)
+chartDays :: Map Date Number -> Date -> Int -> D3Eff (Selection Date)
 chartDays input date count = do
   let val = flip dayval $ input
-      margin = {top: 0, right: 0, bottom: 0, left: 0}
-      width = 70 - margin.left - margin.right
-      height = 30 - margin.top - margin.bottom
+      margin = {top: 0.0, right: 0.0, bottom: 0.0, left: 0.0}
+      width = 70.0 - margin.left - margin.right
+      height = 30.0 - margin.top - margin.bottom
       dates = dayRange date count
   ysc <- linearScale
-    .. domain [0, max' val dates]
-    .. range [0, 30]
+    .. domain [0.0, max' val dates]
+    .. range [0.0, 30.0]
     .. toFunction
   svg <- rootSelect "div.weekchart"
     .. mkSvg width height margin
   svg ... selectAll "rect"
-      .. bind $ dates
+      .. bind_ $ dates
     .. enter ..append "rect"
-      .. attr "width" 8
+      .. attr "width" 8.0
       .. attr' "height" $ (ysc <<< val)
-      .. attr'' "x" (\_ i -> i * 10)
-      .. attr'' "y" (\a i -> 30 - (ysc $ val a))
+      .. attr'' "x" (\_ i -> i * 10.0)
+      .. attr'' "y" (\a i -> 30.0 - (ysc $ val a))
       .. style "fill" "#E7E7E7"
       .. style "stroke" "none"
     .. append "title"
@@ -64,33 +68,33 @@ chartDays input date count = do
 succWrap :: forall a. (Enum a) => a -> a
 succWrap x = case succ x of
   Just a -> a
-  Nothing -> firstEnum
+  Nothing -> bottom
 
 -- date as it used to be...
-date' :: Number -> Month -> Number -> Maybe Date
+date' :: Int -> Month -> Int -> Maybe Date
 date' yearN month dayN =
   date year month day
   where
-    year = Year $ fromNumber yearN
-    day = DayOfMonth $ fromNumber dayN
+    year = Year yearN
+    day = DayOfMonth dayN
 
-lastDay :: Number -> Month -> Maybe Date
+lastDay :: Int -> Month -> Maybe Date
 lastDay year month = case succ month of
   Nothing -> date' (year+1) January 0
   Just m -> date' year m 0 -- 0th day is end of last month
 
-monthPath :: Number -> Month -> Number -> Maybe String
+monthPath :: Int -> Month -> Number -> Maybe String
 monthPath year month cellSize = do
   t0 <- date' year month 1
   t1 <- lastDay year month
-  let day d = ((fromEnum $ dayOfWeek d) + 6) % 7
+  let day = dayNumber <<< dayOfWeek
   let w0 = week t0
   let w1 = week t1
-  return $ "M" ++ show ((w0 + 1) * cellSize) ++ "," ++ show ((day t0) * cellSize)
-        ++ "H" ++ show (w0 * cellSize) ++ "V" ++ show (7 * cellSize)
-        ++ "H" ++ show (w1 * cellSize) ++ "V" ++ show (((day t1)+1)* cellSize)
-        ++ "H" ++ show ((w1 + 1) * cellSize) ++ "V" ++ (show 0)
-        ++ "H" ++ show ((w0 + 1) * cellSize) ++ "Z"
+  return $ "M" ++ show ((w0 + 1.0) * cellSize) ++ "," ++ show ((day t0) * cellSize)
+        ++ "H" ++ show (w0 * cellSize) ++ "V" ++ show (7.0 * cellSize)
+        ++ "H" ++ show (w1 * cellSize) ++ "V" ++ show (((day t1)+1.0)* cellSize)
+        ++ "H" ++ show ((w1 + 1.0) * cellSize) ++ "V" ++ (show 0.0)
+        ++ "H" ++ show ((w0 + 1.0) * cellSize) ++ "Z"
 
 yearRange year = Arr.mapMaybe dayOf yearRange'
   where
@@ -100,7 +104,7 @@ yearRange year = Arr.mapMaybe dayOf yearRange'
 monthTotal :: Map Date Number -> Date -> Number
 monthTotal input m =
   let sameMonth d1 d2 = (year d1) == (year d2) && (month d1) == (month d2)
-      days = Arr.filter (sameMonth m) $ keys input
+      days = filter (sameMonth m) $ keys input
       values = flip dayval input <$> days
   in
     sum values
@@ -113,7 +117,7 @@ monday d =
     isMonday :: Date -> Boolean
     isMonday d = dayOfWeek d == Monday
 
-bind' :: forall oldData newData. (oldData -> [newData]) -> Selection oldData -> D3Eff (Update newData)
+bind' :: forall oldData newData. (oldData -> Array newData) -> Selection oldData -> D3Eff (Update newData)
 bind' = ffi ["fn", "selection", ""] "selection.data(fn)"
 
 selectAll' :: forall d. String -> Selection d -> D3Eff (Selection d)
@@ -121,17 +125,17 @@ selectAll' = ffi ["selector", "selection", ""] "selection.selectAll(selector)"
 
 
 
-monthChart :: forall a. (Appendable a) => Map Date Number -> (a Number) -> D3Eff (Selection Number)
+monthChart :: forall a. (Appendable a) => Map Date Number -> (a Int) -> D3Eff (Selection Int)
 monthChart input yearSelect =
-  let cellSize = 17
-      width = 960
-      height = cellSize * 7
-      margin = {top: 20, right: 20, bottom: 2, left: 20}
+  let cellSize = 17.0
+      width = 960.0
+      height = cellSize * 7.0
+      margin = {top: 20.0, right: 20.0, bottom: 2.0, left: 20.0}
       colorClasses = (\i -> "q" ++ show i) <$> Arr.range 9 0
-      monthTotalHeight = 0
+      monthTotalHeight = 0.0
   in do
     color <- thresholdScale
-      .. domain [5, 10, 15, 20, 25, 30, 40, 50, 70]
+      .. domain $ toNumber <$> [5, 10, 15, 20, 25, 30, 40, 50, 70]
       .. range colorClasses
       .. toFunction
 
@@ -159,11 +163,11 @@ monthChart input yearSelect =
         .. bind' (\y -> Arr.mapMaybe (\m -> date' y m 1) $ enumFromTo January December)
       .. enter .. append "text"
         .. attr "class" "monthTotal"
-        .. attr' "x" (\d -> show ((fromMaybe 0 $ week <$> monday d) * cellSize))
-        .. attr "y" (-5) -- um.
+        .. attr' "x" (\d -> show ((fromMaybe 0.0 $ week <$> monday d) * cellSize))
+        .. attr "y" (-5.0) -- um.
         .. text' (\d -> (formatDate "%b" $ toJSDate d) ++ ": " ++ (format ".0f" $ monthTotal input d))
 
-    update ... selectionFilter' (\d -> dayval d input > 0)
+    update ... selectionFilter' (\d -> dayval d input > 0.0)
         .. attr' "class" (\d -> "day " ++ color (dayval d input))
       .. select "title"
         .. text' (\d -> fullDateFormat (toJSDate d) ++ ": " ++ (format ".1f" $ dayval d input))
@@ -183,12 +187,12 @@ monthCharts input year count = do
 
   sel <- rootSelect "div.monthchart"
     .. selectAll "svg"
-      .. bind (Arr.range year $ year+count-1)
+      .. bind_ (Arr.range year $ year+count-1)
   sel ... enter .. monthChart input
 
 
-chartMonths :: Number -> [ Activity ] -> D3Eff (Unit)
+chartMonths :: Int -> Array Activity -> D3Eff (Unit)
 chartMonths y x = void $ monthCharts (buildMap x) (2015-y+1) y
 
-chartWeek :: Date -> [ Activity ] -> D3Eff (Unit)
+chartWeek :: Date -> Array Activity -> D3Eff (Unit)
 chartWeek date x = void $ chartDays (buildMap x) date 7

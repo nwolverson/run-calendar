@@ -1,7 +1,8 @@
 module CalendarChart.Main where
 
-import Data.Maybe
+import Prelude
 
+import Data.Maybe
 import Data.JSON
 
 import CalendarChart.Chart
@@ -10,8 +11,7 @@ import CalendarChart.Strava
 import CalendarChart.RA
 import CalendarChart.Util
 
-import Data.Array(map,mapMaybe,length,filter,concat,(..))
-import Debug.Trace
+import Data.Array(mapMaybe,length,filter,concat,(..),findIndex,modifyAt,(:))
 import Data.Date
 import Data.Time
 import Data.Tuple
@@ -22,6 +22,7 @@ import Control.Monad.Eff.Class
 import Control.Monad.Eff.Class(liftEff)
 import Control.Monad.Aff(launchAff,Aff())
 import Network.HTTP.Affjax
+import Control.Monad.Eff.Console
 
 import qualified Browser.WebStorage as WS
 
@@ -43,11 +44,11 @@ import qualified Halogen.HTML.Events.Types as ET
 import qualified Halogen.HTML.Events.Forms as A
 import qualified Halogen.HTML.Events.Handler as E
 import qualified Halogen.HTML.Events.Monad as E
-import Control.Functor (($>))
+import Data.Functor (($>))
 import Control.Plus (empty)
+import qualified Data.Int as I
 
-
-fetchCont :: ([Activity] -> Eff _ (Unit)) -> Aff _ Unit
+fetchCont :: (Array Activity -> Eff _ (Unit)) -> Aff _ Unit
 fetchCont chartf = do
   strava <- get "data/activities.json"
   let vals = fromMaybe [] $ decode $ strava.response
@@ -72,32 +73,32 @@ chart y = chartMonths y <<< filter (\(Activity a) -> a.type == Run)
 stravaTokenKey = "stravaToken"
 savedStateKey = "savedState"
 
-downloadStrava :: forall e. Unit -> Aff (trace :: Trace | e) [Activity]
+downloadStrava :: forall e. Unit -> Aff (console :: CONSOLE | e) (Array Activity)
 downloadStrava _ = do
   let stravaUrl = "https://www.strava.com/oauth/authorize?client_id=2746&response_type=code&redirect_uri=http://localhost:8123/token_exchange&scope=public&state=mystate&approval_prompt=force"
   cachedToken <- liftEff $ WS.getItem WS.localStorage stravaTokenKey
 
   case cachedToken of
     Nothing -> do
-      liftEff $ trace "Downloading Strava"
+      liftEff $ log "Downloading Strava"
       let stravaUrl = "https://www.strava.com/oauth/authorize?client_id=2746&response_type=code&redirect_uri=http://localhost:8123/token_exchange&scope=public&state=mystate&approval_prompt=force"
       liftEff $ openWindow stravaUrl "login" "height=600,width=800"
       token <- externalCallAff "downloadedStrava"
-      liftEff $ trace $ "Got Strava token: " ++ token
+      liftEff $ log $ "Got Strava token: " ++ token
       downloadedStrava token
     Just token -> do
-      liftEff $ trace "Got cached token"
+      liftEff $ log "Got cached token"
       downloadedStrava token
 
-downloadedStrava :: forall e. String -> Aff (trace :: Trace | e) [Activity]
+downloadedStrava :: forall e. String -> Aff (console :: CONSOLE | e) (Array Activity)
 downloadedStrava token = do
-  liftEff $ trace $ "Strava callback complete: " ++ token
+  liftEff $ log $ "Strava callback complete: " ++ token
   liftEff $ WS.setItem WS.localStorage stravaTokenKey token
   fetchStrava 1 token
 
-fetchStrava :: forall e. Number -> String -> Aff (trace :: Trace | e) [Activity]
+fetchStrava :: forall e. Int -> String -> Aff (console :: CONSOLE | e) (Array Activity)
 fetchStrava page token = do
-  liftEff $ trace "About to fetch strava data"
+  liftEff $ log "About to fetch strava data"
   let url = "https://www.strava.com/api/v3/athlete/activities?per_page=200" ++ "&page=" ++ (show page) ++ "&access_token=" ++ token ++ "&callback={callback}"
   text <- jsonpAff url
   return $ getStravaFromText text
@@ -109,24 +110,21 @@ dataActivities :: forall i. String -> A.Attr i
 dataActivities = A.attr $ A.attributeName "data-activities"
 
 data ActivityDetail = RunningAhead | StravaFile | StravaLink
-data Activities = Activities ActivityDetail [Activity]
+data Activities = Activities ActivityDetail (Array Activity)
 
-data State = State { data:: [Activities], years:: Number, lastPull:: Maybe Date }
+data State = State { data:: Array Activities, years:: Int, lastPull:: Maybe Date }
 
 defaultState :: State
 defaultState = State { data: [], years: 1, lastPull: Nothing }
 
 instance activityDetailEq :: Eq ActivityDetail where
-  (==) RunningAhead RunningAhead = true
-  (==) StravaFile StravaFile = true
-  (==) StravaLink StravaLink = true
-  (==) _ _ = false
-  (/=) a b = not (a == b)
+  eq RunningAhead RunningAhead = true
+  eq StravaFile StravaFile = true
+  eq StravaLink StravaLink = true
+  eq _ _ = false
 
 instance activitiesEq :: Eq Activities where
-  (==) (Activities d acts) (Activities d' acts') = d == d' && acts == acts'
-  (/=) a b = not (a == b)
-
+  eq (Activities d acts) (Activities d' acts') = d == d' && acts == acts'
 
 instance activityDetailToJSON :: ToJSON ActivityDetail where
   toJSON RunningAhead = JString "ra"
@@ -159,7 +157,16 @@ instance stateFromJSON :: FromJSON State where
     lp <- o .: "lastPull"
     return $ State { data: d, years: y, lastPull : lp }
 
-data Input = RaData [Activity] | StravaFileData [Activity] | Years Number | StravaDownloadData [Activity] Date
+
+instance intToJSON :: ToJSON Int where
+  toJSON n = toJSON $ I.toNumber n
+
+instance intFromJSON :: FromJSON Int where
+  parseJSON (JNumber n) = case I.fromNumber n of
+    Just i -> Right i
+    Nothing -> Left "Non-integer"
+
+data Input = RaData (Array Activity) | StravaFileData (Array Activity) | Years Int | StravaDownloadData (Array Activity) Date | SavedState State
 
 ui :: State -> Component (E.Event (HalogenEffects _)) Input Input
 ui initialState = render <$> stateful initialState updateState
@@ -168,14 +175,14 @@ ui initialState = render <$> stateful initialState updateState
   render s@(State { data = activities, years = years}) = H.div_
     [ H.input [ A.type_ "file", A.id_ "rafileinput", A.onChange $ \e -> pure (do
         text <- E.async $ getFile e
-        liftEff $ trace "Got RA data"
+        liftEff $ log "Got RA data"
         ra <- liftEff $ getRAfromText text
         return $ RaData ra
       ) ] []
 
     , H.input [ A.type_ "file", A.id_ "stravafileinput", A.onChange $ \e -> pure (do
         text <- E.async $ getFile e
-        liftEff $ trace "Got Strava data"
+        liftEff $ log "Got Strava data"
         let sa = getStravaFromText text
         return $ StravaFileData sa
       ) ] []
@@ -229,14 +236,25 @@ ui initialState = render <$> stateful initialState updateState
   updateState (State rec @ { data = s }) (StravaDownloadData a d) =
     State rec { data = mergeActs (Activities StravaLink a) s, lastPull = Just d }
   updateState (State s) (Years n) = State $ s { years = n }
+  updateState (State s) (SavedState ss) = ss
   updateState (ss) _ = ss
 
-mergeActs :: Activities -> [Activities] -> [Activities]
-mergeActs act [] = [act]
-mergeActs (Activities d acts) (Activities d' acts' : rest) | d == d' = Activities d (acts++acts') : rest
-mergeActs x (a : rest) = a : mergeActs x rest
+mergeActs :: Activities -> Array Activities -> Array Activities
+mergeActs (newActs@(Activities d acts)) aa =
+  case findIndex (\(Activities d' _) -> d == d') aa of
+    Just i -> fromMaybe [] (arr i)
+    Nothing -> newActs : aa
+  where
+    arr :: Int -> Maybe (Array Activities)
+    arr i = ((modifyAt i update aa) :: Maybe (Array Activities))
+    update (Activities _ acts') = Activities d (acts++acts')
 
-allActivities :: [Activities] -> [Activity]
+-- mergeActs :: Activities -> Array Activities -> Array Activities
+-- mergeActs act [] = [act]
+-- mergeActs (Activities d acts) (Activities d' acts' : rest) | d == d' = Activities d (acts++acts') : rest
+-- mergeActs x (a : rest) = a : mergeActs x rest
+
+allActivities :: Array Activities -> Array Activity
 allActivities acts =
   concat $ toActivities <$> acts
   where
@@ -251,7 +269,7 @@ updateChart elt = do
     case decode dat of
       Just (State { data = acts, years = y}) -> do
         chart y $ allActivities acts
-      Nothing -> trace "No data?!"
+      Nothing -> log "No data?!"
 
 isOld :: Maybe Date -> Date -> Boolean
 isOld Nothing _ = true
@@ -268,18 +286,19 @@ mainInteractive =  do
   cachedToken <- liftEff $ WS.getItem WS.localStorage stravaTokenKey
   savedState <- liftEff $ WS.getItem WS.localStorage savedStateKey
 
-  let initialState = fromMaybe defaultState $ savedState >>= decode
-  current <- liftEff now
-  state <- case initialState of
-    State (s@{ lastPull: lp }) | isOld lp current -> do
-      recentActs <- maybe (pure []) downloadedStrava cachedToken
-      return $ State $ s { lastPull = Just current, data = mergeActs (Activities StravaLink recentActs) s.data }
-    _ -> return initialState
-
-
-  Tuple node _ <- liftEff $ runUIWith (ui state) \req elt driver -> updateChart elt
+  Tuple node driver <- liftEff $ runUIWith (ui defaultState) \req elt driver -> updateChart elt
   liftEff $ appendToBody node
-  liftEff $ updateChart node
+
+  --liftEff $ updateChart node
+
+  let initialState = fromMaybe defaultState $ savedState >>= decode
+  liftEff $ driver $ SavedState initialState
+  current <- liftEff now
+  case {s: initialState, t: cachedToken} of
+    { s: State { lastPull: lp }, t: Just token } | isOld lp current -> do
+      recentActs <- downloadedStrava token
+      liftEff $ driver $ StravaDownloadData recentActs current
+    _ -> return unit
 
   return unit
 

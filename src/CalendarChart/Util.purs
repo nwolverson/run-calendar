@@ -1,5 +1,7 @@
 module CalendarChart.Util where
 
+import Prelude hiding (append)
+
 import Graphics.D3.Base
 import Graphics.D3.Selection
 import Graphics.D3.Scale
@@ -14,8 +16,6 @@ import DOM
 import DOM.File
 
 import Data.Either
-import Debug.Trace
-
 
 import Data.DOM.Simple.Element
 import Data.DOM.Simple.Types
@@ -43,7 +43,7 @@ selectionFilter' :: forall d. (d -> Boolean) -> Selection d -> D3Eff (Selection 
 selectionFilter' = unsafeForeignFunction ["fn", "selection", ""] "selection.filter(fn)"
 
 
-parseTsv :: String -> [Foreign]
+parseTsv :: String -> Array Foreign
 parseTsv = ffi ["str"] "d3.tsv.parse(str)"
 
 

@@ -1,5 +1,7 @@
 module CalendarChart.Strava where
 
+import Prelude
+
 import CalendarChart.Activities
 
 import Data.Date(Date(),fromString)
@@ -20,7 +22,7 @@ instance activityFromJSON :: FromJSON StravaActivity where
     return $ StravaActivity $ Activity { date: startDate, distance: dist, type: cType }
   parseJSON _ = fail "activity parse failed"
 
-getStravaFromText :: String -> [Activity]
+getStravaFromText :: String -> Array Activity
 getStravaFromText t =
   case decode t of
     Just stravaActs -> getAct <$> stravaActs

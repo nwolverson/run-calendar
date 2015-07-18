@@ -1,27 +1,30 @@
 module CalendarChart.Activities where
 
+import Prelude
+
 import Data.Date
 import Data.Time
 import Data.Date.UTC
 import Data.Enum
 import Data.Map
-import Data.Tuple
+import Data.Tuple hiding (lookup)
 import Data.Maybe
 import qualified Data.Array as Arr
-import Data.Foldable(foldlArray)
-
+import Data.Foldable(foldl)
+import Math
+import qualified Data.Int as I
 import Data.JSON
+import qualified Data.List as L
 
 import CalendarChart.Util
 
 data Type = Run | Bike | Other String
 
 instance typeEq :: Eq Type where
-  (==) Run Run = true
-  (==) Bike Bike = true
-  (==) (Other x) (Other y) = x == y
-  (==) _ _ = false
-  (/=) a b = not (a == b)
+  eq Run Run = true
+  eq Bike Bike = true
+  eq (Other x) (Other y) = x == y
+  eq _ _ = false
 
 type ActivityR = { date :: Date, distance :: Number, type :: Type }
 data Activity = Activity ActivityR
@@ -41,9 +44,8 @@ instance activityFromJSON :: FromJSON Activity where
     return $ Activity { date: date, distance: dist, type: ty }
 
 instance activityEq :: Eq Activity where
-  (==) (Activity {date: d, distance: dist, type: t}) (Activity {date: d', distance: dist', type: t'}) =
+  eq (Activity {date: d, distance: dist, type: t}) (Activity {date: d', distance: dist', type: t'}) =
     d == d' && dist == dist' && t == t'
-  (/=) a b = not (a == b)
 
 instance typeToJSON :: ToJSON Type where
   toJSON Run = JString "run"
@@ -78,24 +80,26 @@ combine1 a1 (Activity { date: d2, distance: n2, type: t }) =
     d <- dayOf (a.date)
     return $ Activity $ a { distance = (a.distance) + n2 }
 
-combineA :: [Activity] -> Maybe Activity
-combineA ((Activity h):t) = foldlArray combine1 (Activity <$> dayAct h) t
-combineA [] = Nothing
+combineA :: Array Activity -> Maybe Activity
+combineA arr = c $ Arr.uncons arr
+  where
+    c (Just { head: (Activity h), tail: t}) = foldl combine1 (Activity <$> dayAct h) t
+    c _ = Nothing
 
-buildMap :: [ Activity ] -> Map Date Number
+buildMap :: Array Activity -> Map Date Number
 buildMap acts =
   let daily = Arr.groupBy (\(Activity a) (Activity b) -> sameDay a b) acts
       g = Arr.mapMaybe combineA daily
-  in fromList $ Arr.map actToTuple $ g
+  in fromList $ L.toList $ map actToTuple $ g
 
 
 dayNumber :: DayOfWeek -> Number
-dayNumber d = (fromEnum d + 6) % 7
+dayNumber d = (I.toNumber $ fromEnum d + 6) % 7.0
 
 dayval :: Date -> Map Date Number -> Number
 dayval k input =
-  let res = fromMaybe 0 $ lookup k input
-  in res / 1000
+  let res = fromMaybe 0.0 $ lookup k input
+  in res / 1000.0
 
 addDays d n =
   let milsPerDay = 1000 * 60 * 60 * 24
