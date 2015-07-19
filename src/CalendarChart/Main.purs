@@ -48,6 +48,8 @@ import Data.Functor (($>))
 import Control.Plus (empty)
 import qualified Data.Int as I
 
+import Network.RemoteCallback
+
 fetchCont :: (Array Activity -> Eff _ (Unit)) -> Aff _ Unit
 fetchCont chartf = do
   strava <- get "data/activities.json"
@@ -73,7 +75,7 @@ chart y = chartMonths y <<< filter (\(Activity a) -> a.type == Run)
 stravaTokenKey = "stravaToken"
 savedStateKey = "savedState"
 
-downloadStrava :: forall e. Unit -> Aff (console :: CONSOLE | e) (Array Activity)
+downloadStrava :: forall e. Unit -> Aff (console :: CONSOLE, dom :: DOM | e) (Array Activity)
 downloadStrava _ = do
   let stravaUrl = "https://www.strava.com/oauth/authorize?client_id=2746&response_type=code&redirect_uri=http://localhost:8123/token_exchange&scope=public&state=mystate&approval_prompt=force"
   cachedToken <- liftEff $ WS.getItem WS.localStorage stravaTokenKey
@@ -83,24 +85,25 @@ downloadStrava _ = do
       liftEff $ log "Downloading Strava"
       let stravaUrl = "https://www.strava.com/oauth/authorize?client_id=2746&response_type=code&redirect_uri=http://localhost:8123/token_exchange&scope=public&state=mystate&approval_prompt=force"
       liftEff $ openWindow stravaUrl "login" "height=600,width=800"
-      token <- externalCallAff "downloadedStrava"
+      token <- externalCall "downloadedStrava"
       liftEff $ log $ "Got Strava token: " ++ token
       downloadedStrava token
     Just token -> do
       liftEff $ log "Got cached token"
       downloadedStrava token
 
-downloadedStrava :: forall e. String -> Aff (console :: CONSOLE | e) (Array Activity)
+downloadedStrava :: forall e. String -> Aff (console :: CONSOLE, dom :: DOM | e) (Array Activity)
 downloadedStrava token = do
   liftEff $ log $ "Strava callback complete: " ++ token
   liftEff $ WS.setItem WS.localStorage stravaTokenKey token
   fetchStrava 1 token
 
-fetchStrava :: forall e. Int -> String -> Aff (console :: CONSOLE | e) (Array Activity)
+fetchStrava :: forall e. Int -> String -> Aff (console :: CONSOLE, dom :: DOM | e) (Array Activity)
 fetchStrava page token = do
   liftEff $ log "About to fetch strava data"
-  let url = "https://www.strava.com/api/v3/athlete/activities?per_page=200" ++ "&page=" ++ (show page) ++ "&access_token=" ++ token ++ "&callback={callback}"
-  text <- jsonpAff url
+  let callback = "PS_FetchStrava_Callback"
+  let url = "https://www.strava.com/api/v3/athlete/activities?per_page=200" ++ "&page=" ++ (show page) ++ "&access_token=" ++ token ++ "&callback=" ++ callback
+  text <- jsonp callback url
   return $ getStravaFromText text
 
 appendToBody :: forall eff. HTMLElement -> Eff (dom :: DOM | eff) Unit
@@ -156,15 +159,6 @@ instance stateFromJSON :: FromJSON State where
     y <- o .: "years"
     lp <- o .: "lastPull"
     return $ State { data: d, years: y, lastPull : lp }
-
-
-instance intToJSON :: ToJSON Int where
-  toJSON n = toJSON $ I.toNumber n
-
-instance intFromJSON :: FromJSON Int where
-  parseJSON (JNumber n) = case I.fromNumber n of
-    Just i -> Right i
-    Nothing -> Left "Non-integer"
 
 data Input = RaData (Array Activity) | StravaFileData (Array Activity) | Years Int | StravaDownloadData (Array Activity) Date | SavedState State
 

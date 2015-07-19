@@ -100,21 +100,6 @@ readAsTextAff fr file = makeAff (\error success -> readAsText fr file success)
 openWindow :: forall a. String -> String -> String -> Eff (d :: DOM | a) Unit
 openWindow = ffi ["url", "windowName", "features", ""] "window.open(url,windowName,features)"
 
--- ugh, stringify to parse...
-jsonp :: String -> (String -> Eff _ Unit) -> Eff _ Unit
-jsonp = ffi ["url", "cb", ""] "d3.jsonp(url, function(d) { cb(JSON.stringify(d))(); });"
-
-jsonpAff :: String -> Aff _ String
-jsonpAff url = makeAff (\error success -> jsonp url success)
-
 -- oh dear.
 callPhantom :: Boolean -> D3Eff Unit
 callPhantom = unsafeForeignFunction ["x", ""] "window.callPhantom && window.callPhantom(x);"
-
-externalCall :: String -> (String -> Eff _ Unit) -> Eff _ Unit
-externalCall = ffi ["name", "cb", ""] """window[name] = function (x) {
-  cb(x)(); };
-"""
-
-externalCallAff :: String -> Aff _ String
-externalCallAff name = makeAff (\error success -> externalCall name success)
