@@ -3,76 +3,22 @@ module.exports = function(grunt) {
   "use strict";
 
   grunt.initConfig({
-
-    srcFiles: ["bower_components/**/src/**/*.purs", "!bower_components/**/examples/**/*.purs", "src/**/*.purs"],
-
-    psc: {
-      options: {
-        main: "CalendarChart.Main",
-        modules: ["CalendarChart.Main"]
-      },
-      all: {
-        src: ["<%=srcFiles%>"],
-        dest: "dist/js/Main.js"
-      }
-    },
-
-    pscMake: {
-      options: {
-        main: "CalendarChart.Main"
-      },
-      all: {
-        src: ["<%=srcFiles%>"],
-        dest: "build"
-      }
-    },
-
-    dotPsci: {
-      src: ["<%=srcFiles%>"]
-    },
-
-     copy: [
-      {
-        src :['src/main.js'],
-        dest: 'tmp/main.js'
-      },
-      {
-        src: ['src/chart.js'],
-        dest: 'tmp/chart.js'
-      },
-      {
-        src: ['src/test.js'],
-        dest: 'tmp/test.js'
-      },
-      {
-        expand: true,
-        cwd: "build",
-        src: ["**"],
-        dest: "tmp/node_modules/"
-      }
-    ],
-
-    browserify: {
-      all: {
-        src: ["tmp/main.js"],
-        dest: "dist/js/Main.js"
-      },
+    exec: {
       main: {
-        src: ["tmp/chart.js"],
-        dest: "dist/js/Chart.js"
+        cmd: 'pulp browserify -m CalendarChart.Main -t dist/js/Main.js'
       },
-      test: {
-        src: ["tmp/test.js"],
-        dest: "dist/js/Test.js"
+      chart: {
+        cmd: 'pulp browserify -m CalendarChart.Main -t dist/js/Chart.js'
       }
     },
-    watch: {
-      files: "**/*.purs",
-      tasks: ["pscMake", "copy", "browserify"],
-      options: {
-        livereload: true
-      }
-    },
+
+    // watch: {
+    //   files: "**/*.purs",
+    //   tasks: ["pscMake", "copy", "browserify"],
+    //   options: {
+    //     livereload: true
+    //   }
+    // },
 
     connect: {
       server: {
@@ -83,14 +29,15 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.loadNpmTasks("grunt-purescript");
+
+  grunt.loadNpmTasks("grunt-exec");
   grunt.loadNpmTasks("grunt-contrib-copy");
 
   grunt.loadNpmTasks("grunt-contrib-watch");
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-browserify');
 
-  grunt.registerTask("default", ["pscMake", "copy", "browserify", "dotPsci"]);
+  grunt.registerTask("default", ["exec"]);
 
   grunt.registerTask("w", ["connect", "watch"]);
 };
