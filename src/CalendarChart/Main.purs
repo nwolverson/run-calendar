@@ -268,7 +268,7 @@ updateChart elt = do
 isOld :: Maybe Date -> Date -> Boolean
 isOld Nothing _ = true
 isOld (Just old) current =
-  diff > Hours 1
+  diff > Hours 1.0
   where
     t1 = toEpochMilliseconds old
     t2 = toEpochMilliseconds current
