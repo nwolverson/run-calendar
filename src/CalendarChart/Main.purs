@@ -30,23 +30,31 @@ import Data.Either
 import Data.Foreign(readString)
 import Control.Bind
 import DOM
-import Data.DOM.Simple.Document
-import Data.DOM.Simple.Element
-import Data.DOM.Simple.Types
-import Data.DOM.Simple.Window
+import DOM.File.Types
+import DOM.Node.Types
+import DOM.HTML.Types
+import DOM.Node.Document
+import DOM.HTML (window)
+import DOM.HTML.Window (document)
+import DOM.Node.ParentNode (querySelector)
+
 import Halogen
-import Halogen.Signal
 import Halogen.Component
 import qualified Halogen.HTML as H
-import qualified Halogen.HTML.Attributes as A
+import qualified Halogen.HTML.Properties as A
 import qualified Halogen.HTML.Events as A
 import qualified Halogen.HTML.Events.Types as ET
 import qualified Halogen.HTML.Events.Forms as A
 import qualified Halogen.HTML.Events.Handler as E
-import qualified Halogen.HTML.Events.Monad as E
+import qualified Halogen.Query.StateF as S
 import Data.Functor (($>))
 import Control.Plus (empty)
 import qualified Data.Int as I
+
+import Control.Monad.Free
+import Data.Coyoneda
+
+import Control.Monad.Rec.Class (MonadRec)
 
 import Network.RemoteCallback
 
@@ -106,11 +114,8 @@ fetchStrava page token = do
   text <- jsonp callback url
   return $ getStravaFromText text
 
-appendToBody :: forall eff. HTMLElement -> Eff (dom :: DOM | eff) Unit
-appendToBody e = document globalWindow >>= (body >=> flip appendChild e)
-
-dataActivities :: forall i. String -> A.Attr i
-dataActivities = A.attr $ A.attributeName "data-activities"
+dataActivities :: forall i. String -> H.Prop i
+dataActivities s = H.prop (H.propName "alt") (Just $ H.attrName "alt") s
 
 data ActivityDetail = RunningAhead | StravaFile | StravaLink
 data Activities = Activities ActivityDetail (Array Activity)
@@ -138,7 +143,8 @@ instance activityDetailFromJSON :: FromJSON ActivityDetail where
   parseJSON (JString "ra") = pure RunningAhead
   parseJSON (JString "stravafile") = pure StravaFile
   parseJSON (JString "strava") = pure StravaLink
-
+  parseJSON (JString _) = fail "Unknown detail name"
+  parseJSON _ = fail "Not string"
 
 instance activitiesToJSON :: ToJSON Activities where
   toJSON (Activities detail acts) = object [ "detail" .= detail, "acts" .= acts ]
@@ -148,6 +154,7 @@ instance activitiesFromJSON :: FromJSON Activities where
     detail <- o .: "detail"
     acts <- o .: "acts"
     return $ Activities detail acts
+  parseJSON _ = fail "Not object"
 
 instance stateToJSON :: ToJSON State where
   toJSON (State { data = d, years = y, lastPull = lastPull }) =
@@ -159,79 +166,131 @@ instance stateFromJSON :: FromJSON State where
     y <- o .: "years"
     lp <- o .: "lastPull"
     return $ State { data: d, years: y, lastPull : lp }
+  parseJSON _ = fail "Not object"
 
-data Input = RaData (Array Activity) | StravaFileData (Array Activity) | Years Int | StravaDownloadData (Array Activity) Date | SavedState State
+-- data Input a = RaData (Array Activity) a
+--   | StravaFileData (Array Activity) a
+--   | Years Int a
+--   | StravaDownloadData (Array Activity) Date a
+--   | SavedState State a
 
-ui :: State -> Component (E.Event (HalogenEffects _)) Input Input
-ui initialState = render <$> stateful initialState updateState
+data Input a =
+  DownloadStrava a
+  | RaFileInput a
+  | StravaFileInput a
+  | StravaFileInputControl HTMLElement a
+  | RaFileInputControl HTMLElement a
+
+  | Years Int a
+  -- Driver input:
+  | StravaDownloadData (Array Activity) Date a
+  | SavedState State a
+
+type AppEffects = HalogenEffects (d3 :: Graphics.D3.Base.D3, feff :: CalendarChart.Util.FileEffect, console :: CONSOLE)
+
+ui :: forall p. Component State Input (Aff AppEffects) p
+-- ui :: State -> Component (E.Event (HalogenEffects _)) Input Input
+-- ui initialState = render <$> stateful initialState updateState
+ui = component render eval
   where
-  render :: State -> H.HTML (E.Event (HalogenEffects _) Input)
-  render s@(State { data = activities, years = years}) = H.div_
-    [ H.input [ A.type_ "file", A.id_ "rafileinput", A.onChange $ \e -> pure (do
-        text <- E.async $ getFile e
-        liftEff $ log "Got RA data"
-        ra <- liftEff $ getRAfromText text
-        return $ RaData ra
-      ) ] []
+  render :: Render State _ p
+  render (s@(State { data = activities, years = years})) = H.div_ [
+     H.div [ A.classes [ H.className "header" ] ] [
+          H.input [ A.type_ "file", A.id_ "rafileinput"
+            , A.onChange $ A.input (\e -> RaFileInputControl e.target) ]
 
-    , H.input [ A.type_ "file", A.id_ "stravafileinput", A.onChange $ \e -> pure (do
-        text <- E.async $ getFile e
-        liftEff $ log "Got Strava data"
-        let sa = getStravaFromText text
-        return $ StravaFileData sa
-      ) ] []
+          , H.input [ A.type_ "file", A.id_ "stravafileinput"
+            , A.onChange $ A.input (\e -> StravaFileInputControl e.target) ]
 
-    , H.div [ A.classes [ A.className "header" ] ] [
-          H.span [ A.classes [A.className "title"] ] [ H.text "Run Calendar" ]
-        , H.span [ A.onClick $ clickFileInput "#rafileinput" ] [ H.text "RA" ]
-        , H.span [ A.onClick $ clickFileInput "#stravafileinput", A.classes [A.className "strava"] ] [ H.img [ A.src "strava.svg"] [],  H.text "Strava/local" ]
-        , H.span [ A.classes [A.className "strava"], A.onClick $ \_ -> pure (do
-              sa <- E.async $ downloadStrava unit
-              d <- liftEff $ now
-              return $ StravaDownloadData sa d) ]
-          [
-            H.img [ A.src "strava.svg" ] []
+        , H.span [ A.classes [H.className "title"] ] [ H.text "Run Calendar" ]
+        , H.span [
+            A.onClick (A.input_ RaFileInput)
+          ] [ H.text "RA" ]
+        , H.span [
+            A.onClick (A.input_ StravaFileInput)
+          , A.classes [H.className "strava"] ] [ H.img [ A.src "strava.svg"],  H.text "Strava/local" ]
+        , H.span [
+            A.classes [ H.className "strava"]
+          , A.onClick (A.input_ DownloadStrava)
+          ] [
+            H.img [ A.src "strava.svg" ]
           , H.text "Connect to Strava"
           ]
         , H.text "Years:"
         , H.span_ (yearLink years <$> 1..5 )
         , H.text $ "Data Sources: " ++  show (length activities)
       ]
-
-    , H.div [ dataActivities $ encode s, A.classes [A.className "monthchart", A.className "hcl2"] ] []
+    , H.div [ dataActivities (encode s), H.prop (H.propName "title") (Just $ H.attrName "title") (encode s),  A.classes [H.className "monthchart", H.className "hcl2"] ] []
     ]
 
+  yearLink :: Int -> Int -> H.HTML p (Input Unit)
   yearLink years y =
     if y == years then
-      H.span [ A.classes [ A.className "year", A.className "selected" ] ] [ H.text $ show y ]
+      H.span [ A.classes [ H.className "year", H.className "selected" ] ] [ H.text $ show y ]
     else
-      H.span [ A.onClick $ A.input_ $ Years y, A.classes [ A.className "year" ] ] [ H.text $ show y ]
+      H.span [
+        A.onClick (A.input_ (Years y))
+      , A.classes [ H.className "year" ] ] [ H.text $ show y ]
 
-  clickFileInput :: String -> ET.Event ET.MouseEvent -> E.EventHandler _
-  clickFileInput selector _ = pure $ do
-      (liftEff $ do
-          doc <- document globalWindow
-          fileInput <- querySelector selector doc
-          case fileInput of
-            Just i -> click i
-            Nothing -> return unit)
-      empty
+  eval :: Eval Input State Input (Aff AppEffects)
+  eval (DownloadStrava next) = S.modify (\s -> (s :: State)) $> next
 
-  getFile e =
-    case getElementFile e.target of
-      Nothing -> return ""
-      Just f -> readAsTextAff (fileReader unit) (fileAsBlob f)
+  eval (StravaFileInput next) = liftFI $ clickFileInput "#stravafileinput" $> next
+  eval (RaFileInput next) = liftFI $ clickFileInput "#rafileinput" $> next
 
-  updateState :: State -> Input -> State
-  updateState (State rec @ { data = s }) (RaData a) =
-    State rec { data = mergeActs (Activities RunningAhead a) s }
-  updateState (State rec @ { data = s }) (StravaFileData a) =
-    State rec { data = mergeActs (Activities StravaFile a) s }
-  updateState (State rec @ { data = s }) (StravaDownloadData a d) =
-    State rec { data = mergeActs (Activities StravaLink a) s, lastPull = Just d }
-  updateState (State s) (Years n) = State $ s { years = n }
-  updateState (State s) (SavedState ss) = ss
-  updateState (ss) _ = ss
+  eval (RaFileInputControl e next) = do
+    text <- liftFI $ getFile'' e
+    liftFI (logA "Got RA data")
+    acts <- liftFI $ ((liftEff $ getRAfromText text) :: Aff AppEffects (Array Activity))
+    S.modify (\(State x@{data=s}) ->
+      State $ x { data = mergeActs (Activities RunningAhead acts) s }
+    )
+    pure next
+
+  eval (StravaFileInputControl e next) = do
+    text <- liftFI $ getFile'' e
+    liftFI (logA "Got Strava data")
+    let acts = getStravaFromText text
+    S.modify (\(State x@{data=s}) ->
+      State $ x { data = mergeActs (Activities StravaFile acts) s }
+    )
+    pure next
+
+  eval (Years n next) = S.modify (\(State x) -> State $ x { years = n}) $> next
+  eval (StravaDownloadData acts dt next) =  S.modify (\(State x@{data=s}) ->
+    State $ x { data = mergeActs (Activities StravaLink acts) s, lastPull = Just dt }
+    ) $> next
+  eval (SavedState ss next) = S.modify (\_ -> ss) $> next
+
+--   updateState :: State -> Input -> State
+--   updateState (State rec @ { data = s }) (RaData a) =
+--     State rec { data = mergeActs (Activities RunningAhead a) s }
+--   updateState (State rec @ { data = s }) (StravaFileData a) =
+--     State rec { data = mergeActs (Activities StravaFile a) s }
+--   updateState (State rec @ { data = s }) (StravaDownloadData a d) =
+--     State rec { data = mergeActs (Activities StravaLink a) s, lastPull = Just d }
+--   updateState (State s) (Years n) = State $ s { years = n }
+--   updateState (State s) (SavedState ss) = ss
+--   updateState (ss) _ = ss
+
+clickFileInput :: String -> Aff AppEffects Unit
+clickFileInput selector =
+  liftEff $ do
+      w <- DOM.HTML.window
+      doc <- DOM.HTML.Window.document w
+      fileInput <- DOM.Node.ParentNode.querySelector selector $ documentToParentNode $ htmlDocumentToDocument doc
+      case Data.Nullable.toMaybe fileInput of
+        Just i -> return unit -- TODO -- click i
+        Nothing -> return unit
+
+getFile'' :: HTMLElement -> Aff AppEffects String
+getFile'' e =
+  case getElementFile e of
+    Nothing -> return ""
+    Just f -> readAsTextAff (fileReader unit) (fileAsBlob f)
+
+logA :: String -> Aff AppEffects Unit
+logA s = liftEff $ log s
 
 mergeActs :: Activities -> Array Activities -> Array Activities
 mergeActs (newActs@(Activities d acts)) aa =
@@ -254,16 +313,17 @@ allActivities acts =
   where
     toActivities (Activities _ acts) = acts
 
-updateChart :: HTMLElement -> Eff (HalogenEffects (d3 :: Graphics.D3.Base.D3, feff :: CalendarChart.Util.FileEffect)) Unit
+updateChart :: HTMLElement -> Eff (HalogenEffects (d3 :: Graphics.D3.Base.D3, feff :: CalendarChart.Util.FileEffect, console :: CONSOLE)) Unit
 updateChart elt = do
-  divElts <- querySelector ".monthchart" elt
-  for_ divElts \divElt -> do
-    dat <- getAttribute "data-activities" $ divElt
-    liftEff $ WS.setItem WS.localStorage savedStateKey dat
-    case decode dat of
-      Just (State { data = acts, years = y}) -> do
-        chart y $ allActivities acts
-      Nothing -> log "No data?!"
+  divElts <- querySelector ".monthchart" $ elementToParentNode $ htmlElementToElement $ elt
+  return unit
+  -- for_ divElts \divElt -> do
+  --   dat <- getAttribute "data-activities" $ divElt
+  --   liftEff $ WS.setItem WS.localStorage savedStateKey dat
+  --   case decode dat of
+  --     Just (State { data = acts, years = y}) -> do
+  --       chart y $ allActivities acts
+  --     Nothing -> log "No data?!"
 
 isOld :: Maybe Date -> Date -> Boolean
 isOld Nothing _ = true
@@ -274,26 +334,25 @@ isOld (Just old) current =
     t2 = toEpochMilliseconds current
     diff = toHours $ t2 - t1
 
-
-mainInteractive :: Aff (HalogenEffects (d3 :: Graphics.D3.Base.D3, feff :: CalendarChart.Util.FileEffect)) Unit
+mainInteractive :: Aff AppEffects Unit
 mainInteractive =  do
   cachedToken <- liftEff $ WS.getItem WS.localStorage stravaTokenKey
   savedState <- liftEff $ WS.getItem WS.localStorage savedStateKey
-
-  Tuple node driver <- liftEff $ runUIWith (ui defaultState) \req elt driver -> updateChart elt
-  liftEff $ appendToBody node
-
-  --liftEff $ updateChart node
+  --
+  { node: node, driver: driver } <- runUI ui defaultState -- \req elt driver -> updateChart elt
+  liftEff $ (Halogen.Util.appendToBody node :: Eff AppEffects Unit)
 
   let initialState = fromMaybe defaultState $ savedState >>= decode
-  liftEff $ driver $ SavedState initialState
+  driver (action $ SavedState initialState)
+  liftEff $ updateChart node
   current <- liftEff now
   case {s: initialState, t: cachedToken} of
     { s: State { lastPull: lp }, t: Just token } | isOld lp current -> do
       recentActs <- downloadedStrava token
-      liftEff $ driver $ StravaDownloadData recentActs current
+      driver (action $ StravaDownloadData recentActs current)
     _ -> return unit
 
   return unit
 
+main :: Eff AppEffects Unit
 main = launchAff $ mainInteractive

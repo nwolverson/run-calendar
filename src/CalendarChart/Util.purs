@@ -13,12 +13,10 @@ import Data.Foreign.EasyFFI
 import Data.Foreign(Foreign(..),unsafeFromForeign,F(..),readArray)
 import Control.Monad.Eff
 import DOM
-import DOM.File
+import DOM.File.Types
+import DOM.HTML.Types
 
 import Data.Either
-
-import Data.DOM.Simple.Element
-import Data.DOM.Simple.Types
 
 --import Control.Monad.Eff.Class(liftEff)
 import Control.Monad.Aff(makeAff,Aff())
@@ -75,6 +73,9 @@ getElementFile sel = do
   case Data.Foreign.readArray files of
     Right [ f ] -> Just $ unsafeFromForeign $ f
     _ -> Nothing
+
+getElementFile' :: forall eff. HTMLElement -> Eff (dom :: DOM | eff) (Maybe File)
+getElementFile' e = return $ getElementFile e
 
 fileReader :: Unit -> FileReader
 fileReader = ffi [""] "new FileReader()"
