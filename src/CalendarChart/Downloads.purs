@@ -73,9 +73,12 @@ downloadStrava _ = do
       liftEff $ log "Downloading Strava"
       let stravaUrl = "https://www.strava.com/oauth/authorize?client_id=2746&response_type=code&redirect_uri=http://localhost:8123/token_exchange&scope=public&state=mystate&approval_prompt=force"
       liftEff $ openWindow stravaUrl "login" "height=600,width=800"
-      token <- externalCall "downloadedStrava"
-      liftEff $ log $ "Got Strava token: " ++ token
-      downloadedStrava token
+      ftoken <- externalCall "downloadedStrava"
+      case readString ftoken of
+        Right token -> do
+          liftEff $ log $ "Got Strava token: " ++ token
+          downloadedStrava token
+        _ -> return []
     Just token -> do
       liftEff $ log "Got cached token"
       downloadedStrava token
@@ -91,5 +94,6 @@ fetchStrava page token = do
   liftEff $ log "About to fetch strava data"
   let callback = "PS_FetchStrava_Callback"
   let url = "https://www.strava.com/api/v3/athlete/activities?per_page=200" ++ "&page=" ++ (show page) ++ "&access_token=" ++ token ++ "&callback=" ++ callback
-  text <- jsonp callback url
+  result <- jsonp callback url
+  let text = foreignStringify result
   return $ getStravaFromText text

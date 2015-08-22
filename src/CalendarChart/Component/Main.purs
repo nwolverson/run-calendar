@@ -1,6 +1,7 @@
 module CalendarChart.Component.Main where
 
 import CalendarChart.Component.Types
+import CalendarChart.Downloads
 
 import Prelude
 
@@ -62,7 +63,6 @@ import Control.Monad.Rec.Class (MonadRec)
 
 import Network.RemoteCallback
 
-
 container :: forall cp co. ParentComponent State ChartState Input ChartInput (Aff AppEffects) co ChartPlaceholder cp
 container = component render eval
   where
@@ -106,7 +106,15 @@ container = component render eval
       , A.classes [ H.className "year" ] ] [ H.text $ show y ]
 
   eval :: Eval Input State Input (QueryFP State ChartState ChartInput (Aff AppEffects) co ChartPlaceholder cp)
-  eval (DownloadStrava next) = S.modify (\s -> (s :: State)) $> next
+  eval (DownloadStrava next) = do
+    acts <- liftQuery $ liftFI $ downloadStrava unit
+    liftQuery $ liftEff' $ log "Downloaded strava data"
+    S.modify (\(State x@{data=s}) ->
+      State $ x { data = mergeActs (Activities StravaLink acts) s }
+    )
+    ns <- S.get
+    liftQuery $ query ChartPlaceholder (action (ChartInput ns))
+    pure next
   eval (StravaFileInput next) = liftQuery $ liftFI $ clickFileInput "#stravafileinput" $> next
   eval (RaFileInput next) = liftQuery $ liftFI $ clickFileInput "#rafileinput" $> next
   eval (RaFileInputControl e next) = do
@@ -145,7 +153,6 @@ container = component render eval
     S.modify (\_ -> ss)
     liftQuery $ query ChartPlaceholder (action (ChartInput ss))
     pure next
-
 
 clickFileInput :: String -> Aff AppEffects Unit
 clickFileInput selector =

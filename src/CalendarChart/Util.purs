@@ -113,3 +113,7 @@ openWindow = ffi ["url", "windowName", "features", ""] "window.open(url,windowNa
 -- oh dear.
 callPhantom :: Boolean -> D3Eff Unit
 callPhantom = unsafeForeignFunction ["x", ""] "window.callPhantom && window.callPhantom(x);"
+
+-- Sigh, easier than rewriting parsing code
+foreignStringify :: Foreign -> String
+foreignStringify = ffi ["x"] "JSON.stringify(x)"

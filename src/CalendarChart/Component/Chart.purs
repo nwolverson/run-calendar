@@ -66,8 +66,8 @@ import CalendarChart.Downloads
 import CalendarChart.Component.Main
 import CalendarChart.Component.Chart
 
-
 savedStateKey = "savedState"
+
 
 chartUi :: forall p. Component ChartState ChartInput (Aff AppEffects) p
 chartUi = component render eval
