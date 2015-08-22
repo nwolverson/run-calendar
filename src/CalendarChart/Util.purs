@@ -47,16 +47,25 @@ parseTsv = ffi ["str"] "d3.tsv.parse(str)"
 
 unsafeOnEvent :: forall eff a i r. String -> (i -> Eff eff r) -> (Selection a) -> D3Eff (Selection a)
 unsafeOnEvent = ffi ["eventName", "callback", "selection", ""] "selection.on(eventName, function(data) { return callback(data)(); })"
-
+--"
 onChange :: forall eff a r. (Foreign -> Eff eff r) -> (Selection a) -> D3Eff (Selection a)
 onChange = unsafeOnEvent "change"
 
 onClick' :: forall eff a r. (Foreign -> Eff eff r) -> (Selection a) -> D3Eff (Selection a)
 onClick' = unsafeOnEvent "click"
 
+click :: forall eff. HTMLElement -> Eff (dom :: DOM | eff) Unit
+click = ffi ["elt", ""] "elt.click()"
+
+elementToHtmlElement :: DOM.Node.Types.Element -> Maybe HTMLElement
+elementToHtmlElement elt = castElt Just Nothing elt
+  where
+    castElt :: (HTMLElement -> Maybe HTMLElement) -> (Maybe HTMLElement) -> DOM.Node.Types.Element -> Maybe HTMLElement
+    castElt = ffi ["just", "nothing", "elt"] "elt instanceof HTMLElement ? just(elt) : nothing"
+
 nodeFiles :: forall a. Selection a -> Foreign
 nodeFiles = ffi ["selection"] "selection.node() !== null ? Array.prototype.slice.call(selection.node().files) : null"
-
+--"
 getFile :: forall a. Selection a -> Maybe File
 getFile sel = do
   let files = nodeFiles sel

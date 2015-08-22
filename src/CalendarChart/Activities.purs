@@ -67,6 +67,41 @@ instance dateFromJSON :: FromJSON Date where
       Nothing -> fail "Not date"
   parseJSON _ = fail "Not string"
 
+data ActivityDetail = RunningAhead | StravaFile | StravaLink
+data Activities = Activities ActivityDetail (Array Activity)
+
+
+instance activityDetailEq :: Eq ActivityDetail where
+  eq RunningAhead RunningAhead = true
+  eq StravaFile StravaFile = true
+  eq StravaLink StravaLink = true
+  eq _ _ = false
+
+instance activitiesEq :: Eq Activities where
+  eq (Activities d acts) (Activities d' acts') = d == d' && acts == acts'
+
+instance activityDetailToJSON :: ToJSON ActivityDetail where
+  toJSON RunningAhead = JString "ra"
+  toJSON StravaFile = JString "stravafile"
+  toJSON StravaLink = JString "strava"
+
+instance activityDetailFromJSON :: FromJSON ActivityDetail where
+  parseJSON (JString "ra") = pure RunningAhead
+  parseJSON (JString "stravafile") = pure StravaFile
+  parseJSON (JString "strava") = pure StravaLink
+  parseJSON (JString _) = fail "Unknown detail name"
+  parseJSON _ = fail "Not string"
+
+instance activitiesToJSON :: ToJSON Activities where
+  toJSON (Activities detail acts) = object [ "detail" .= detail, "acts" .= acts ]
+
+instance activitiesFromJSON :: FromJSON Activities where
+  parseJSON (JObject o) = do
+    detail <- o .: "detail"
+    acts <- o .: "acts"
+    return $ Activities detail acts
+  parseJSON _ = fail "Not object"
+
 dayOf d = date (year d) (month d) (dayOfMonth d)
 actToTuple (Activity { date: d, distance: n }) = Tuple d n
 sameDay { date: d1 } { date: d2 } = dayOf d1 == dayOf d2
@@ -110,3 +145,19 @@ weekFormat = formatDate "%W"
 fullDateFormat = formatDate "%Y-%m-%d"
 isoDateFormat = formatDate "%Y-%m-%dT%H:%M:%SZ"
 week d = parseInt $ weekFormat $ toJSDate d
+
+mergeActs :: Activities -> Array Activities -> Array Activities
+mergeActs (newActs@(Activities d acts)) aa =
+  case Arr.findIndex (\(Activities d' _) -> d == d') aa of
+    Just i -> fromMaybe [] (arr i)
+    Nothing -> Arr.cons newActs aa
+  where
+    arr :: Int -> Maybe (Array Activities)
+    arr i = ((Arr.modifyAt i update aa) :: Maybe (Array Activities))
+    update (Activities _ acts') = Activities d (acts++acts')
+
+allActivities :: Array Activities -> Array Activity
+allActivities acts =
+  Arr.concat $ toActivities <$> acts
+  where
+    toActivities (Activities _ acts) = acts
