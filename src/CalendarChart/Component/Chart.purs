@@ -69,7 +69,6 @@ import CalendarChart.Component.Chart
 
 savedStateKey = "savedState"
 
-
 chartUi :: forall p. Component ChartState ChartInput (Aff AppEffects) p
 chartUi = component render eval
   where
@@ -85,8 +84,8 @@ chartUi = component render eval
     S.modify _ { state = s }
 
     liftEff' $ WS.setItem WS.localStorage savedStateKey $ encode s
-    -- let onLoad = \_ -> ((chart y $ allActivities acts) :: (Eff AppEffects Unit))
-    -- DOM.Event.EventTarget.addEventListener DOM.Event.EventTypes.load (DOM.Event.EventTarget.eventListener onLoad) false <<< DOM.HTML.Types.windowToEventTarget =<< window
+    let onLoad = \_ -> ((chart y $ allActivities acts) :: (Eff AppEffects Unit))
+    liftEff' $ DOM.Event.EventTarget.addEventListener DOM.Event.EventTypes.load (DOM.Event.EventTarget.eventListener onLoad) false <<< DOM.HTML.Types.windowToEventTarget =<< window
 
     liftEff' $ chart y $ allActivities acts
     pure next
