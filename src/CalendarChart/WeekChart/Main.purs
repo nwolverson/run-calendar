@@ -1,5 +1,6 @@
-module CalendarChart.Main where
+module CalendarChart.WeekChart.Main where
 
+import CalendarChart.WeekChart.Chart
 
 import Prelude
 
@@ -35,7 +36,7 @@ import Control.Monad.Eff.Console
 import qualified Browser.WebStorage as WS
 
 import Data.Either
-import Data.Foreign(readString)
+import Data.Foreign(readString,unsafeFromForeign)
 import Control.Bind
 import DOM
 import DOM.File.Types
@@ -66,36 +67,19 @@ import Control.Monad.Rec.Class (MonadRec)
 
 import Network.RemoteCallback
 
-ui :: forall p eff. State -> InstalledComponent State ChartState Input ChartInput (Aff AppEffects) (Const Void) ChartPlaceholder p
-ui s = install container \ChartPlaceholder -> Tuple chartUi { elt : Nothing, state : s }
+fetchCont :: (Array Activity -> Eff _ (Unit)) -> Aff _ Unit
+fetchCont chartf = do
+  strava <- get "data/activities.json"
+  let vals = getStravaFromText $ strava.response
+  ra <- get "data/log.txt"
+  pp <- liftEff $ getRAfromText ra.response
+  let acts = filter (\(Activity a) -> a.type == Run) $ vals ++ pp
+  liftEff $ do
+    chartf acts
+    callPhantom false
 
-isOld :: Maybe Date -> Date -> Boolean
-isOld Nothing _ = true
-isOld (Just old) current =
-  diff > Hours 1.0
-  where
-    t1 = toEpochMilliseconds old
-    t2 = toEpochMilliseconds current
-    diff = toHours $ t2 - t1
-
-mainInteractive :: Aff AppEffects Unit
-mainInteractive =  do
-  cachedToken <- liftEff $ WS.getItem WS.localStorage stravaTokenKey
-  savedState <- liftEff $ WS.getItem WS.localStorage savedStateKey
-
-  { node: node, driver: driver } <- runUI (ui defaultState) $ installedState defaultState
-  liftEff $ (Halogen.Util.appendToBody node :: Eff AppEffects Unit)
-
-  let initialState = fromMaybe defaultState $ savedState >>= decode
-  driver (action $ SavedState initialState)
-  current <- liftEff now
-  case {s: initialState, t: cachedToken} of
-    { s: State { lastPull: lp }, t: Just token } | isOld lp current -> do
-      recentActs <- downloadedStrava token
-      driver (action $ StravaDownloadData recentActs current)
-    _ -> return unit
-
-  return unit
-
-main :: Eff AppEffects Unit
-main = launchAff $ mainInteractive
+main :: Eff _ Unit
+main = launchAff do
+  jsd <- externalCall "ChartWeek"
+  let dt = (Data.Maybe.Unsafe.fromJust $ fromJSDate $ unsafeFromForeign jsd) :: Date
+  fetchCont $ chartWeek dt

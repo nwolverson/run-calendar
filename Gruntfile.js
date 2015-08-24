@@ -12,18 +12,17 @@ module.exports = function(grunt) {
       }
     },
 
-    // watch: {
-    //   files: "**/*.purs",
-    //   tasks: ["pscMake", "copy", "browserify"],
-    //   options: {
-    //     livereload: true
-    //   }
-    // },
+  //   watch: {
+  //     files: "**/*.purs",
+  // //    tasks: ["pscMake", "copy", "browserify"],
+
+  //   },
 
     connect: {
       server: {
         options: {
-          base: "dist/"
+          base: "dist/",
+          keepalive: true
         }
       }
     }

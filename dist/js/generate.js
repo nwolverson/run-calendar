@@ -10,12 +10,22 @@ if (args.length < 2)
   phantom.exit();
 }
 
+page.onResourceRequested = function (request) {
+    console.log('Request ' + JSON.stringify(request, undefined, 4));
+};
+page.onError = function (msg, trace) {
+    console.log(msg);
+    trace.forEach(function(item) {
+        console.log('  ', item.file, ':', item.line);
+    });
+};
+
 var date = args[1];
 console.log("Generating for week: "+ date);
 
-page.open("http://localhost:8123/index.html", function(status) {
+page.open("http://localhost:8000/index.html", function(status) {
     page.evaluate(function(date) {
-      CalendarChart.mainWeek(new Date(date))();
+      ChartWeek(new Date(date));
     }, date);
 });
 

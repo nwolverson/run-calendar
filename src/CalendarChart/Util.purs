@@ -40,6 +40,12 @@ selectionFilter = unsafeForeignFunction ["selector", "selection", ""] "selection
 selectionFilter' :: forall d. (d -> Boolean) -> Selection d -> D3Eff (Selection d)
 selectionFilter' = unsafeForeignFunction ["fn", "selection", ""] "selection.filter(fn)"
 
+bind' :: forall oldData newData. (oldData -> Array newData) -> Selection oldData -> D3Eff (Update newData)
+bind' = ffi ["fn", "selection", ""] "selection.data(fn)"
+
+selectAll' :: forall d. String -> Selection d -> D3Eff (Selection d)
+selectAll' = ffi ["selector", "selection", ""] "selection.selectAll(selector)"
+
 
 parseTsv :: String -> Array Foreign
 parseTsv = ffi ["str"] "d3.tsv.parse(str)"

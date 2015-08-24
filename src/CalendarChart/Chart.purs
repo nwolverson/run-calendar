@@ -22,48 +22,10 @@ import Data.List(filter)
 
 import CalendarChart.Util
 import CalendarChart.Activities
+import CalendarChart.ChartUtil
 
 import Data.Foldable(sum,find)
 
-type Margin = { top :: Number, right :: Number, bottom :: Number, left :: Number }
-
-mkSvg :: forall a s. (Appendable s) => Number -> Number -> Margin -> (s a) -> D3Eff (Selection a)
-mkSvg width height margin sel =
-  sel ... append "svg"
-    .. attr "width" (width + margin.left + margin.right)
-    .. attr "height" (height + margin.top + margin.bottom)
-  .. append "g"
-    .. attr "transform" ("translate(" ++ show margin.left ++ "," ++ show margin.top ++ ")")
-
-
-dayRange start count = Arr.mapMaybe dayOf range
-  where
-    range = Arr.mapMaybe (addDays start) $ Arr.range 0 (count-1)
-
-chartDays :: Map Date Number -> Date -> Int -> D3Eff (Selection Date)
-chartDays input date count = do
-  let val = flip dayval $ input
-      margin = {top: 0.0, right: 0.0, bottom: 0.0, left: 0.0}
-      width = 70.0 - margin.left - margin.right
-      height = 30.0 - margin.top - margin.bottom
-      dates = dayRange date count
-  ysc <- linearScale
-    .. domain [0.0, max' val dates]
-    .. range [0.0, 30.0]
-    .. toFunction
-  svg <- rootSelect "div.weekchart"
-    .. mkSvg width height margin
-  svg ... selectAll "rect"
-      .. bind_ $ dates
-    .. enter ..append "rect"
-      .. attr "width" 8.0
-      .. attr' "height" $ (ysc <<< val)
-      .. attr'' "x" (\_ i -> i * 10.0)
-      .. attr'' "y" (\a i -> 30.0 - (ysc $ val a))
-      .. style "fill" "#E7E7E7"
-      .. style "stroke" "none"
-    .. append "title"
-      .. text' (\x -> show x ++ ": " ++ (show $ val x))
 
 succWrap :: forall a. (Enum a) => a -> a
 succWrap x = case succ x of
@@ -116,14 +78,6 @@ monday d =
     days = Arr.mapMaybe (addDays d) (Arr.range 0 6)
     isMonday :: Date -> Boolean
     isMonday d = dayOfWeek d == Monday
-
-bind' :: forall oldData newData. (oldData -> Array newData) -> Selection oldData -> D3Eff (Update newData)
-bind' = ffi ["fn", "selection", ""] "selection.data(fn)"
-
-selectAll' :: forall d. String -> Selection d -> D3Eff (Selection d)
-selectAll' = ffi ["selector", "selection", ""] "selection.selectAll(selector)"
-
-
 
 monthChart :: forall a. (Appendable a) => Map Date Number -> (a Int) -> D3Eff (Selection Int)
 monthChart input yearSelect =
@@ -193,6 +147,3 @@ monthCharts input year count = do
 
 chartMonths :: Int -> Array Activity -> D3Eff (Unit)
 chartMonths y x = void $ monthCharts (buildMap x) (2015-y+1) y
-
-chartWeek :: Date -> Array Activity -> D3Eff (Unit)
-chartWeek date x = void $ chartDays (buildMap x) date 7
