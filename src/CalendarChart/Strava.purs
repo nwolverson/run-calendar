@@ -12,7 +12,8 @@ data StravaActivity = StravaActivity Activity
 
 instance activityFromJSON :: FromJSON StravaActivity where
   parseJSON (JObject o) = do
-    startDate <- o .: "start_date"
+    jdate <- o .: "start_date"
+    startDate <- parseJSONdate jdate
     dist <- o .: "distance"
     ty <- o .: "type"
     let cType = case ty of

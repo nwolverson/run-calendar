@@ -30,7 +30,8 @@ import Control.Monad.Eff
 import Control.Monad.Eff.Class
 import Control.Monad.Eff.Class(liftEff)
 import Control.Monad.Aff(launchAff,Aff())
-import Network.HTTP.Affjax
+import Network.HTTP.Affjax hiding (get)
+import qualified Network.HTTP.Affjax as AJ
 import Control.Monad.Eff.Console
 
 import qualified Browser.WebStorage as WS
@@ -69,9 +70,9 @@ import Network.RemoteCallback
 
 fetchCont :: (Array Activity -> Eff _ (Unit)) -> Aff _ Unit
 fetchCont chartf = do
-  strava <- get "data/activities.json"
+  strava <- AJ.get "data/activities.json"
   let vals = getStravaFromText $ strava.response
-  ra <- get "data/log.txt"
+  ra <- AJ.get "data/log.txt"
   pp <- liftEff $ getRAfromText ra.response
   let acts = filter (\(Activity a) -> a.type == Run) $ vals ++ pp
   liftEff $ do

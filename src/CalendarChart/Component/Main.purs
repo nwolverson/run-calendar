@@ -26,7 +26,7 @@ import Control.Monad.Eff
 import Control.Monad.Eff.Class
 import Control.Monad.Eff.Class(liftEff)
 import Control.Monad.Aff(launchAff,Aff())
-import Network.HTTP.Affjax
+import Network.HTTP.Affjax hiding (get)
 import Control.Monad.Eff.Console
 
 import qualified Browser.WebStorage as WS
@@ -51,7 +51,6 @@ import qualified Halogen.HTML.Events as A
 import qualified Halogen.HTML.Events.Types as ET
 import qualified Halogen.HTML.Events.Forms as A
 import qualified Halogen.HTML.Events.Handler as E
-import qualified Halogen.Query.StateF as S
 import Data.Functor (($>))
 import Control.Plus (empty)
 import qualified Data.Int as I
@@ -109,10 +108,10 @@ container = component render eval
   eval (DownloadStrava next) = do
     acts <- liftQuery $ liftFI $ downloadStrava unit
     liftQuery $ liftEff' $ log "Downloaded strava data"
-    S.modify (\(State x@{data=s}) ->
+    modify (\(State x@{data=s}) ->
       State $ x { data = mergeActs (Activities StravaLink acts) s }
     )
-    ns <- S.get
+    ns <- get
     liftQuery $ query ChartPlaceholder (action (ChartInput ns))
     pure next
   eval (StravaFileInput next) = liftQuery $ liftFI $ clickFileInput "#stravafileinput" $> next
@@ -121,36 +120,36 @@ container = component render eval
     text <- liftQuery $ liftFI $ getFile'' e
     liftQuery $ liftEff' $ log "Got RA data"
     acts <- liftQuery $ liftEff' $ getRAfromText text
-    S.modify (\(State x@{data=s}) ->
+    modify (\(State x@{data=s}) ->
       State $ x { data = mergeActs (Activities RunningAhead acts) s }
     )
-    ns <- S.get
+    ns <- get
     liftQuery $ query ChartPlaceholder (action (ChartInput ns))
     pure next
   eval (StravaFileInputControl e next) = do
     text <- liftQuery $ liftFI $ getFile'' e
     liftQuery $ liftEff' $ log "Got Strava data"
     let acts = getStravaFromText text
-    S.modify (\(State x@{data=s}) ->
+    modify (\(State x@{data=s}) ->
       State $ x { data = mergeActs (Activities StravaFile acts) s }
     )
-    ns <- S.get
+    ns <- get
     liftQuery $ query ChartPlaceholder (action (ChartInput ns))
     pure next
   eval (StravaDownloadData acts date next) = do
-    S.modify (\(State x@{data=s}) ->
+    modify (\(State x@{data=s}) ->
       State $ x { data = mergeActs (Activities StravaLink acts) s, lastPull = Just date }
     )
-    ns <- S.get
+    ns <- get
     liftQuery $ query ChartPlaceholder (action (ChartInput ns))
     pure next
   eval (Years n next) = do
-    S.modify (\(State x) -> State $ x { years = n})
-    state <- S.get
+    modify (\(State x) -> State $ x { years = n})
+    state <- get
     liftQuery $ query ChartPlaceholder (action (ChartInput state))
     pure next
   eval (SavedState ss next) = do
-    S.modify (\_ -> ss)
+    modify (\_ -> ss)
     liftQuery $ query ChartPlaceholder (action (ChartInput ss))
     pure next
 

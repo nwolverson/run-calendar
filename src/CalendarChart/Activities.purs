@@ -26,6 +26,7 @@ instance typeEq :: Eq Type where
   eq (Other x) (Other y) = x == y
   eq _ _ = false
 
+
 type ActivityR = { date :: Date, distance :: Number, type :: Type }
 data Activity = Activity ActivityR
 
@@ -34,11 +35,12 @@ instance showActivity :: Show Activity where
 
 instance activityToJSON :: ToJSON Activity where
   toJSON (Activity { date = dt, distance = dist, type = t }) =
-    object [ "date" .= dt, "dist" .= dist, "ty" .= t ]
+    object [ "date" .= toJSONdate dt, "dist" .= dist, "ty" .= t ]
 
 instance activityFromJSON :: FromJSON Activity where
   parseJSON (JObject o) = do
-    date <- o .: "date"
+    dateS <- o .: "date"
+    date <- parseJSONdate dateS
     dist <- o .: "dist"
     ty <- o .: "ty"
     return $ Activity { date: date, distance: dist, type: ty }
@@ -57,15 +59,22 @@ instance typeFromJSON :: FromJSON Type where
   parseJSON (JString "bike") = pure Bike
   parseJSON (JString x) = pure $ Other x
 
-instance dateToJSON :: ToJSON Date where
-  toJSON date = JString $ dateToISOString $ toJSDate date
+-- instance dateToJSON :: ToJSON Date where
+toJSONdate :: Date -> JValue
+toJSONdate date = JString $ dateToISOString $ toJSDate date
 
-instance dateFromJSON :: FromJSON Date where
-  parseJSON (JString ds) =
-    case fromString ds of
-      Just d -> return d
-      Nothing -> fail "Not date"
-  parseJSON _ = fail "Not string"
+-- instance dateFromJSON :: FromJSON Date where
+parseJSONdate :: String -> JParser Date
+parseJSONdate ds  =
+  case fromString ds of
+    Just d -> return d
+    Nothing -> fail "Not date"
+
+--   parseJSON (JString ds) =
+--     case fromString ds of
+--       Just d -> return d
+--       Nothing -> fail "Not date"
+--   parseJSON _ = fail "Not string"
 
 data ActivityDetail = RunningAhead | StravaFile | StravaLink
 data Activities = Activities ActivityDetail (Array Activity)

@@ -7,6 +7,7 @@ import Data.JSON
 import DOM.HTML.Types(HTMLElement())
 import Data.Maybe
 import Data.Date
+import Data.Either
 import CalendarChart.Activities
 
 type AppEffects = HalogenEffects (d3 :: Graphics.D3.Base.D3, feff :: CalendarChart.Util.FileEffect, console :: Control.Monad.Eff.Console.CONSOLE)
@@ -43,12 +44,15 @@ defaultState = State { data: [], years: 1, lastPull: Nothing }
 
 instance stateToJSON :: ToJSON State where
   toJSON (State { data = d, years = y, lastPull = lastPull }) =
-    object [ "data" .= d, "years" .= y, "lastPull" .= lastPull ]
+    object [ "data" .= d, "years" .= y, "lastPull" .= toJSONdate <$> lastPull ]
 
 instance stateFromJSON :: FromJSON State where
   parseJSON (JObject o) = do
     d <- o .: "data"
     y <- o .: "years"
     lp <- o .: "lastPull"
-    return $ State { data: d, years: y, lastPull : lp }
+    lp' <- case lp of
+      Nothing -> Right Nothing
+      Just s -> Just <$> parseJSONdate s
+    return $ State { data: d, years: y, lastPull : lp' }
   parseJSON _ = fail "Not object"

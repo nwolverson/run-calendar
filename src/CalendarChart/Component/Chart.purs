@@ -25,7 +25,7 @@ import Control.Monad.Eff
 import Control.Monad.Eff.Class
 import Control.Monad.Eff.Class(liftEff)
 import Control.Monad.Aff(launchAff,Aff())
-import Network.HTTP.Affjax
+import Network.HTTP.Affjax hiding (get)
 import Control.Monad.Eff.Console
 
 import qualified Browser.WebStorage as WS
@@ -81,7 +81,7 @@ chartUi = component render eval
   eval :: Eval ChartInput ChartState ChartInput (Aff AppEffects)
   eval (ChartInput (s@ (State { data=acts, years=y })) next) = do
     liftEff' $ log "child chart got state"
-    S.modify _ { state = s }
+    modify _ { state = s }
 
     liftEff' $ WS.setItem WS.localStorage savedStateKey $ encode s
     let onLoad = \_ -> ((chart y $ allActivities acts) :: (Eff AppEffects Unit))
@@ -91,7 +91,7 @@ chartUi = component render eval
     pure next
   eval (Init el next) = do
     liftEff' $ log "Child chart got init"
-    S.modify _{ elt = Just el }
+    modify _{ elt = Just el }
     pure next
 
 

@@ -28,8 +28,8 @@ import Data.Foldable(for_)
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
 import Control.Monad.Eff.Class(liftEff)
-import Control.Monad.Aff(launchAff,Aff())
-import Network.HTTP.Affjax
+import Control.Monad.Aff(launchAff,runAff,Aff())
+import Network.HTTP.Affjax hiding (get)
 import Control.Monad.Eff.Console
 
 import qualified Browser.WebStorage as WS
@@ -59,6 +59,8 @@ import Data.Functor (($>))
 import Control.Plus (empty)
 import qualified Data.Int as I
 
+import Data.Functor.Coproduct(left)
+
 import Control.Monad.Free
 import Data.Coyoneda
 
@@ -86,16 +88,19 @@ mainInteractive =  do
   { node: node, driver: driver } <- runUI (ui defaultState) $ installedState defaultState
   liftEff $ (Halogen.Util.appendToBody node :: Eff AppEffects Unit)
 
+
   let initialState = fromMaybe defaultState $ savedState >>= decode
-  driver (action $ SavedState initialState)
+  driver (left $ action $ SavedState initialState)
   current <- liftEff now
   case {s: initialState, t: cachedToken} of
     { s: State { lastPull: lp }, t: Just token } | isOld lp current -> do
       recentActs <- downloadedStrava token
-      driver (action $ StravaDownloadData recentActs current)
+      return unit
+      driver (left $ action $ StravaDownloadData recentActs current)
     _ -> return unit
 
   return unit
 
+--ugh launchAff gives duplicate exception effect
 main :: Eff AppEffects Unit
-main = launchAff $ mainInteractive
+main = runAff (pure (return unit)) (pure (return unit)) mainInteractive

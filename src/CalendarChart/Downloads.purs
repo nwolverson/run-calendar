@@ -24,7 +24,7 @@ import Control.Monad.Eff
 import Control.Monad.Eff.Class
 import Control.Monad.Eff.Class(liftEff)
 import Control.Monad.Aff(launchAff,Aff())
-import Network.HTTP.Affjax
+import Network.HTTP.Affjax hiding (get)
 import Control.Monad.Eff.Console
 
 import qualified Browser.WebStorage as WS
