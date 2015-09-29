@@ -42,7 +42,7 @@ chartDays input date count = do
   svg <- rootSelect "div.weekchart"
     .. mkSvg width height margin
   svg ... selectAll "rect"
-      .. bind_ $ dates
+      .. bindData $ dates
     .. enter ..append "rect"
       .. attr "width" 8.0
       .. attr' "height" $ (ysc <<< val)

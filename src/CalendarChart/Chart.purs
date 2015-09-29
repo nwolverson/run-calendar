@@ -141,7 +141,7 @@ monthCharts input year count = do
 
   sel <- rootSelect "div.monthchart"
     .. selectAll "svg"
-      .. bind_ (Arr.range year $ year+count-1)
+      .. bindData (Arr.range year $ year+count-1)
   sel ... enter .. monthChart input
 
 

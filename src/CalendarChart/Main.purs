@@ -88,7 +88,6 @@ mainInteractive =  do
   { node: node, driver: driver } <- runUI (ui defaultState) $ installedState defaultState
   liftEff $ (Halogen.Util.appendToBody node :: Eff AppEffects Unit)
 
-
   let initialState = fromMaybe defaultState $ savedState >>= decode
   driver (left $ action $ SavedState initialState)
   current <- liftEff now

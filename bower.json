@@ -15,7 +15,7 @@
   ],
   "dependencies": {
     "purescript-halogen": "master",
-    "purescript-d3": "git@github.com:nwolverson/purescript-d3.git#ps-0.7-2",
+    "purescript-d3": "~0.7.0",
     "purescript-webstorage": "git@github.com:flipstone/purescript-webstorage.git#0.7_update",
     "purescript-sets": "~0.5.0",
     "purescript-json": "~0.5.0",

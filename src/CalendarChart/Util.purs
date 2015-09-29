@@ -10,7 +10,7 @@ import Data.Maybe
 import Data.Date
 
 import Data.Foreign.EasyFFI
-import Data.Foreign(Foreign(..),unsafeFromForeign,F(..),readArray)
+import Data.Foreign(Foreign(),unsafeFromForeign,F(),readArray)
 import Control.Monad.Eff
 import DOM
 import DOM.File.Types
@@ -110,7 +110,7 @@ readAsText = ffi ["fr", "file", "callback"]
   return {};
 }"""
 
-readAsTextAff :: FileReader -> Blob -> Aff _ String
+readAsTextAff :: forall a. FileReader -> Blob -> Aff (feff :: FileEffect | a) String
 readAsTextAff fr file = makeAff (\error success -> readAsText fr file success)
 
 openWindow :: forall a. String -> String -> String -> Eff (d :: DOM | a) Unit
