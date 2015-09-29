@@ -29,6 +29,7 @@ parseRA (Right res) = mapMaybe mkActRA <$> parseRA' res
   where
     parseRA' :: forall a. Array a -> D3Eff (Array RALine)
     parseRA' res = traverse coerceDatum res
+parseRA _ = return []
 
 getRAfromText :: String -> D3Eff (Array Activity)
 getRAfromText str = parseRA $ Right $ parseTsv str

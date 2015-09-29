@@ -44,6 +44,7 @@ instance activityFromJSON :: FromJSON Activity where
     dist <- o .: "dist"
     ty <- o .: "ty"
     return $ Activity { date: date, distance: dist, type: ty }
+  parseJSON _ = fail "Expected object"
 
 instance activityEq :: Eq Activity where
   eq (Activity {date: d, distance: dist, type: t}) (Activity {date: d', distance: dist', type: t'}) =
@@ -58,6 +59,7 @@ instance typeFromJSON :: FromJSON Type where
   parseJSON (JString "run") = pure Run
   parseJSON (JString "bike") = pure Bike
   parseJSON (JString x) = pure $ Other x
+  parseJSON _ = fail "Expecting string"
 
 -- instance dateToJSON :: ToJSON Date where
 toJSONdate :: Date -> JValue

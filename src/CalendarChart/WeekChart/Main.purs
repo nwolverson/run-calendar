@@ -68,7 +68,9 @@ import Control.Monad.Rec.Class (MonadRec)
 
 import Network.RemoteCallback
 
-fetchCont :: (Array Activity -> Eff _ (Unit)) -> Aff _ Unit
+import Graphics.D3.Base(D3Eff())
+
+fetchCont :: forall a. (Array Activity -> Eff (d3 :: Graphics.D3.Base.D3, ajax :: AJAX| a) Unit) -> Aff (d3 :: Graphics.D3.Base.D3, ajax :: AJAX| a) Unit
 fetchCont chartf = do
   strava <- AJ.get "data/activities.json"
   let vals = getStravaFromText $ strava.response
@@ -79,7 +81,7 @@ fetchCont chartf = do
     chartf acts
     callPhantom false
 
-main :: Eff _ Unit
+main :: forall a. Eff (ajax :: Network.HTTP.Affjax.AJAX, d3 :: Graphics.D3.Base.D3, dom :: DOM.DOM, err :: Control.Monad.Eff.Exception.EXCEPTION | a) Unit
 main = launchAff do
   jsd <- externalCall "ChartWeek"
   let dt = (Data.Maybe.Unsafe.fromJust $ fromJSDate $ unsafeFromForeign jsd) :: Date
